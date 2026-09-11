@@ -1,0 +1,7 @@
+[build]
+  command = "python3 scripts/build-site.py"
+  publish = "dist"
+
+[[edge_functions]]
+  function = "access"
+  path = "/*"

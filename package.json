@@ -1,0 +1,7 @@
+{
+  "name": "teaching-evaluation-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "交互式课堂评价报告总览 DEMO",
+  "scripts": {"start": "python3 server.py", "dev": "python3 server.py"}
+}
