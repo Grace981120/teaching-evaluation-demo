@@ -2,6 +2,7 @@ import {mountTeachingInteraction} from './method-interaction.js';
 import {mountTeachingQuestions} from './method-questions.js';
 import {mountTeachingLanguage} from './method-language.js';
 import {mountTeachingBoard} from './method-board.js';
+import {mountTeachingMultimedia} from './method-multimedia.js';
 import {methodData as data,methodColors,methodTime,methodDuration,rowDuration} from './method-data.js';
 import {donutSegmentAttributes} from './attitude.js';
 const asset=name=>`assets/figma/method-${name}.svg`;
@@ -59,4 +60,5 @@ export function initMethod({openDialog}){
  mountTeachingInteraction(root.querySelector('#method-interaction'));
  mountTeachingLanguage(root.querySelector('#method-language'),{openDialog});
  mountTeachingBoard(root.querySelector('#method-board'),openDialog);
+ mountTeachingMultimedia(root.querySelector('#method-board'));
 }

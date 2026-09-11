@@ -19,6 +19,7 @@ export const question108Styles=`
 #method-questions .uq-stage-head .mq-tabs{margin:0;align-items:center}
 #method-questions .uq-stage-head .mq-tabs button{height:24px;line-height:20px;padding:1px 5px;margin:0;display:inline-flex;align-items:center;justify-content:center}
 #method-questions .uq-plot{height:240px;min-width:0}
+#method-questions .uq-stage:first-child .uq-plot{display:flex;flex-direction:column}
 #method-questions .uq-plot .mq-classification-groups{margin-top:12px}
 #method-questions .uq-plot .mq-bars{margin-bottom:0}
 #method-questions .uq-ring{display:grid;grid-template-rows:180px 44px;gap:16px}
@@ -36,7 +37,7 @@ export const question108Styles=`
 #method-questions .uq-summary .mq-note{margin:0 0 12px}
 #method-questions .uq-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:0 0 24px}
 #method-questions .uq-detail-grid section{min-width:0}
-#method-questions .uq-detail-grid h3{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+#method-questions .uq-detail-grid h3{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}
 #method-questions .uq-detail-grid .mq-donut{margin:0}
 #method-questions .uq-result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:16px 0;scroll-margin-top:12px}
 #method-questions .uq-result-head h3{margin:0}

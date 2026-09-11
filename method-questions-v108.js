@@ -32,6 +32,21 @@ export function mountQuestions108(root,source=questionData){
   const stats=statistics(teachers);
   let mode='bloom',view='teacher',selection=null,refinement=null,page=0,origin=null,savedScroll=0;
   const controller=new AbortController();
+  function alignLegends(){
+    const labels=[...root.querySelectorAll('.uq-stage:first-child .mq-bars small')];
+    if(!labels.length)return;
+    const target=Math.max(...labels.map(e=>e.getBoundingClientRect().bottom));
+    root.querySelectorAll('.uq-ring .mq-legend').forEach(legend=>{
+      const entries=[...legend.querySelectorAll('button')];if(!entries.length)return;
+      legend.style.transform='none';
+      const bottom=Math.max(...entries.map(e=>e.getBoundingClientRect().bottom));
+      const teacherTop=root.querySelector('.uq-stage').getBoundingClientRect().top;
+      const stageTop=legend.closest('.uq-stage').getBoundingClientRect().top;
+      legend.style.transform=`translateY(${target+stageTop-teacherTop-bottom}px)`;
+    });
+  }
+  const resizeObserver=new ResizeObserver(()=>requestAnimationFrame(alignLegends));
+  resizeObserver.observe(root);
   const action=(kind,value)=>`data-uq-filter="${esc(kind)}" data-value="${esc(value)}"`;
   const a11y='tabindex="0" role="button"';
   function help(id,title,content){return `<span class="mq-help"><button type="button" class="mq-help-button" aria-label="${esc(title)}" aria-describedby="uq-help-${id}">?</button><span id="uq-help-${id}" role="tooltip" class="mq-tooltip"><strong>${esc(title)}</strong>${content}</span></span>`;}
@@ -124,7 +139,7 @@ export function mountQuestions108(root,source=questionData){
     const target=event.target.closest('button,[role="button"]');if(!target||!root.contains(target))return;
     const d=target.dataset;
     if('uqClose' in d){close();return;}
-    if(d.uqMode){mode=d.uqMode;render();root.querySelector(`[data-uq-mode="${mode}"]`).focus({preventScroll:true});return;}
+    if(d.uqMode){mode=d.uqMode;render();requestAnimationFrame(alignLegends);root.querySelector(`[data-uq-mode="${mode}"]`).focus({preventScroll:true});return;}
     if(d.uqEvent){open(target,'timeline',{kind:'id',value:d.uqEvent});return;}
     if('uqAll' in d){open(target,'timeline',null);return;}
     if(d.uqFilter){const filter={kind:d.uqFilter,value:d.value||''};
@@ -138,9 +153,9 @@ export function mountQuestions108(root,source=questionData){
   },{signal:controller.signal});
   root.addEventListener('keydown',event=>{
     const tab=event.target.closest('[data-uq-mode]');
-    if(tab&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();mode=event.key==='Home'?'bloom':event.key==='End'?'mat':mode==='bloom'?'mat':'bloom';render();root.querySelector(`[data-uq-mode="${mode}"]`).focus({preventScroll:true});}
+    if(tab&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();mode=event.key==='Home'?'bloom':event.key==='End'?'mat':mode==='bloom'?'mat':'bloom';render();requestAnimationFrame(alignLegends);root.querySelector(`[data-uq-mode="${mode}"]`).focus({preventScroll:true});}
     if(event.target.matches('path[role="button"]')&&['Enter',' '].includes(event.key)){event.preventDefault();event.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}
   },{signal:controller.signal});
-  render();
-  return ()=>{controller.abort();const dialog=root.querySelector('.mq-dialog');if(dialog){dialog.close();dialog.remove();}root.innerHTML=original;};
+  render();requestAnimationFrame(alignLegends);document.fonts.ready.then(alignLegends);
+  return ()=>{controller.abort();resizeObserver.disconnect();const dialog=root.querySelector('.mq-dialog');if(dialog){dialog.close();dialog.remove();}root.innerHTML=original;};
 }
