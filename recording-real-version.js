@@ -1,1 +1,1 @@
-export const recordingRealVersion = '1.8';
+export const recordingRealVersion = 'baseline';
