@@ -5,6 +5,7 @@ import {recordingTranscript} from './recording-transcript-data.js';
 export function mountRealRecording(root,{toast}) {
   if(recordingRealVersion==='baseline')return;
   root.classList.add('real-recording');
+  root.classList.add('real-video-pending');
   const $=s=>root.querySelector(s), fmt=t=>{t=Math.floor(t||0);return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;};
   const link=document.createElement('link');link.rel='stylesheet';link.href='./recording-real.css';document.head.append(link);
   let selected=1,activeTab='evaluation',pendingTime=0;
@@ -57,11 +58,12 @@ export function mountRealRecording(root,{toast}) {
   const feedback=document.createElement('div');feedback.className='real-playback-status';feedback.setAttribute('role','status');feedback.hidden=true;$('.recording-player').append(feedback);
   function status(text=''){feedback.textContent=text;feedback.hidden=!text;}
   let hls;
-  function loadRemoteVideo(time=0){
+  function loadRemoteVideo(time=0,autoplay=false){
     const source='./assets/recording-video/master.m3u8';
     const start=()=>{video.currentTime=time;video.load();};
     if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=source;start();return;}
-    const attach=()=>{hls=new window.Hls({enableWorker:true});hls.loadSource(source);hls.attachMedia(video);hls.on(window.Hls.Events.MANIFEST_PARSED,()=>{video.currentTime=time;});hls.on(window.Hls.Events.ERROR,(_event,data)=>{if(data.fatal)useStaticPreview();});};
+    const resume=()=>{if(autoplay)video.play().catch(()=>status('视频已加载，请点击播放'));};
+    const attach=()=>{hls=new window.Hls({enableWorker:true});hls.loadSource(source);hls.attachMedia(video);hls.on(window.Hls.Events.MANIFEST_PARSED,()=>{video.currentTime=time;resume();});hls.on(window.Hls.Events.ERROR,(_event,data)=>{if(data.fatal)useStaticPreview();});};
     if(window.Hls){attach();return;}
     const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js';script.onload=attach;script.onerror=useStaticPreview;document.head.append(script);
   }
@@ -76,7 +78,8 @@ export function mountRealRecording(root,{toast}) {
   function renderTranscript(){const query=$('.real-transcript-search').value.trim();const current=video.currentTime||0;const rows=recordingTranscript.filter(row=>`${row.speaker}${row.text}`.includes(query));$('.real-transcript-scroll').innerHTML=rows.length?rows.map(row=>`<button type="button" class="recording-transcript-item ${current>=row.time&&(recordingTranscript[recordingTranscript.indexOf(row)+1]?.time??Infinity)>current?'active':''}" data-real-seek="${row.time}"><span><strong>${row.speaker}</strong><time>${fmt(row.time)}</time></span><p>${row.text}</p></button>`).join(''):'<p class="recording-empty">没有找到相关内容，请尝试其他关键词。</p>';$('.recording-transcript-count').textContent=`共 ${rows.length} 条转写`;}
   function render(){const q=$('.real-search').value.trim();const entries=realKnowledge.filter(k=>k.video===selected&&k.title.includes(q));$('.real-knowledge-list').innerHTML=entries.length?entries.map(k=>`<button type="button" class="real-knowledge-item" data-real-seek="${k.time}"><img src="${k.image}" alt="${k.title}课件截图"><span class="real-ppt-copy"><strong>${k.title}</strong><span class="real-ppt-meta"><time>${fmt(k.time)}</time>${Number.isFinite(k.dwellSeconds)?`<span>停留 ${Math.floor(k.dwellSeconds/60)}分${k.dwellSeconds%60?`${k.dwellSeconds%60}秒`:""}</span>`:""}${k.hasBoard===true?'<span class="real-ppt-board">板书</span>':""}</span></span></button>`).join(''):'<p class="recording-empty">没有匹配的知识点</p>';renderTranscript();sync();}
   function sync(){const duration=Number.isFinite(video.duration)?video.duration:realVideos[selected-1].duration;const t=video.currentTime||0;$('#recording-seek').max=duration;$('#recording-seek').value=t;$('#recording-seek').setAttribute('aria-valuetext',`${fmt(t)}，总时长 ${fmt(duration)}`);$('#recording-time').textContent=`${fmt(t)} / ${fmt(duration)}`;const paths=$('.recording-progress-art').querySelectorAll('path');const x=1288*t/duration;paths[0].setAttribute('d',`M0 0H${x}V3.75875H0Z`);paths[1].setAttribute('d',`M${x} 0H1288V3.75875H${x}Z`);const play=$('[data-rec-action=play]');play.setAttribute('aria-label',video.paused?'播放':'暂停');play.querySelector('img').hidden=!video.paused;play.querySelector('span').hidden=video.paused;const matches=[...root.querySelectorAll('[data-real-seek]')];const current=matches.find(n=>Math.abs(Number(n.dataset.realSeek)-t)<2);matches.forEach(n=>{n.classList.toggle('active',n===current);if(n===current)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});}
-  function select(id,time=0){video.pause();student.pause();if(hls){hls.destroy();hls=undefined;}selected=id;pendingTime=time;loadRemoteVideo(time);status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
+  let mediaLoaded=false;
+  function select(id,time=0){video.pause();student.pause();if(hls){hls.destroy();hls=undefined;}selected=id;pendingTime=time;mediaLoaded=false;root.classList.add('real-video-pending');status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
   function seek(t){if(video.readyState<1){pendingTime=t;return;}video.currentTime=Math.max(0,Math.min(video.duration,t));sync();}
   function switchTab(name){activeTab=name;tabs.querySelectorAll('[role=tab]').forEach(b=>{const yes=(b.dataset.realTab||b.dataset.recTab)===name;b.setAttribute('aria-selected',yes);b.tabIndex=yes?0:-1;});$('#recording-evaluation').hidden=name!=='evaluation';$('#recording-transcript').hidden=name!=='transcript';panel.hidden=name!=='knowledge';}
   // Capture only playback/tab events so the original demo clock cannot simulate playback.
@@ -87,6 +90,7 @@ export function mountRealRecording(root,{toast}) {
     if(!['play','mute','fit','layout','captions','segment','download'].includes(ds.recAction))return;
     e.stopImmediatePropagation();
     if(ds.recAction==='play'){
+      if(!mediaLoaded){mediaLoaded=true;root.classList.remove('real-video-pending');loadRemoteVideo(pendingTime,true);status('正在加载原课堂录像…');return;}
       if(root.classList.contains('real-video-unavailable')){toast('当前为课堂画面预览');return;}
       if(!video.paused)video.pause();else try{await video.play();status();}catch{useStaticPreview();toast('当前为课堂画面预览');}
     }

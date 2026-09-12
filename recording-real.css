@@ -1,4 +1,6 @@
 #recording.real-recording:not(.real-video-unavailable) .recording-feeds figure>img,#recording.real-recording .recording-caption,#recording.real-recording .recording-stat-card,#recording.real-recording .recording-segments>[data-rec-action=segment]{display:none!important}
+#recording.real-recording.real-video-pending #real-classroom-video{display:none!important}
+#recording.real-recording.real-video-pending .recording-feeds figure>img{display:block!important}
 #recording.real-recording:not(.real-video-unavailable) .recording-feeds{grid-template-columns:1fr;grid-template-rows:1fr}
 #recording.real-recording:not(.real-video-unavailable) .recording-teacher{grid-column:1;grid-row:1}
 #recording.real-recording:not(.real-video-unavailable) .recording-students,#recording.real-recording:not(.real-video-unavailable) .recording-screen{display:none}
