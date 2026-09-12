@@ -13,7 +13,10 @@ for entry in output.iterdir():
 for pattern in ("*.html", "*.css", "*.js"):
     for source in root.glob(pattern):
         shutil.copy2(source, output / source.name)
-shutil.copytree(root / "assets", output / "assets", ignore=shutil.ignore_patterns("recording-video-web", "recording-video-web-final", "recording-video-published"))
+shutil.copytree(root / "assets", output / "assets", ignore=shutil.ignore_patterns(
+    "recording-video", "recording-video-web", "recording-video-web-final", "recording-video-published",
+    "AlibabaPuHuiTi-2-55-Regular.ttf", "AlibabaPuHuiTi-2-75-SemiBold.ttf", "AlibabaPuHuiTi-2-85-Bold.ttf",
+))
 shutil.copytree(root / "agent-assets", output / "agent-assets")
 for manifest in (output / "assets" / "figma").glob("*manifest.json"):
     manifest.unlink()

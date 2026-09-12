@@ -1,7 +1,7 @@
 /* Figma 119:37904 / 119:39025. Shared desktop measurements and design tokens. */
-@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-55-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
-@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-75-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
-@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-85-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-55-Regular-web.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-75-SemiBold-web.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:PuHuiTi;src:url('./assets/fonts/AlibabaPuHuiTi-2-85-Bold-web.ttf') format('truetype');font-weight:700;font-display:swap}
 @font-face{font-family:CCtype;src:url('./assets/fonts/CCtype-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
 @font-face{font-family:DIN;src:url('./assets/fonts/DIN-Regular.otf') format('opentype');font-weight:400;font-display:swap}
 :root{font-family:PuHuiTi,'PingFang SC',sans-serif;--blue:#1d70f2;--green:#00cc7e;--magenta:#e545d2;--orange:#ff7626;--muted:#7f848a;--border:#e9ecf0;--primary:#1c1d1e;--secondary:#55585c;--supplementary:#b4bac0;color:var(--primary)}
