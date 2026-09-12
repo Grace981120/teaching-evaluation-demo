@@ -54,6 +54,14 @@ export function mountRealRecording(root,{toast}) {
   const picker=document.createElement('span');picker.className='real-segment-picker';picker.innerHTML=realVideos.map(v=>`<button type="button" data-real-video="${v.id}" aria-pressed="${v.id===1}">${v.title} · ${v.start}</button>`).join('');$('.recording-segments').append(picker);
   const feedback=document.createElement('div');feedback.className='real-playback-status';feedback.setAttribute('role','status');feedback.hidden=true;$('.recording-player').append(feedback);
   function status(text=''){feedback.textContent=text;feedback.hidden=!text;}
+  function useStaticPreview(){
+    root.classList.add('real-video-unavailable');
+    video.hidden=true;
+    student.hidden=true;
+    screen.hidden=true;
+    absent.hidden=true;
+    status();
+  }
   function render(){const q=$('.real-search').value.trim();const entries=realKnowledge.filter(k=>k.video===selected&&k.title.includes(q));$('.real-knowledge-list').innerHTML=entries.length?entries.map(k=>`<button type="button" class="real-knowledge-item" data-real-seek="${k.time}"><img src="${k.image}" alt="${k.title}课件截图"><span class="real-ppt-copy"><strong>${k.title}</strong><span class="real-ppt-meta"><time>${fmt(k.time)}</time>${Number.isFinite(k.dwellSeconds)?`<span>停留 ${Math.floor(k.dwellSeconds/60)}分${k.dwellSeconds%60?`${k.dwellSeconds%60}秒`:""}</span>`:""}${k.hasBoard===true?'<span class="real-ppt-board">板书</span>':""}</span></span></button>`).join(''):'<p class="recording-empty">没有匹配的知识点</p>';sync();}
   function sync(){const duration=Number.isFinite(video.duration)?video.duration:realVideos[selected-1].duration;const t=video.currentTime||0;$('#recording-seek').max=duration;$('#recording-seek').value=t;$('#recording-seek').setAttribute('aria-valuetext',`${fmt(t)}，总时长 ${fmt(duration)}`);$('#recording-time').textContent=`${fmt(t)} / ${fmt(duration)}`;const paths=$('.recording-progress-art').querySelectorAll('path');const x=1288*t/duration;paths[0].setAttribute('d',`M0 0H${x}V3.75875H0Z`);paths[1].setAttribute('d',`M${x} 0H1288V3.75875H${x}Z`);const play=$('[data-rec-action=play]');play.setAttribute('aria-label',video.paused?'播放':'暂停');play.querySelector('img').hidden=!video.paused;play.querySelector('span').hidden=video.paused;const matches=[...root.querySelectorAll('[data-real-seek]')];const current=matches.find(n=>Math.abs(Number(n.dataset.realSeek)-t)<2);matches.forEach(n=>{n.classList.toggle('active',n===current);if(n===current)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});}
   function select(id,time=0){video.pause();student.pause();selected=id;pendingTime=time;video.src=`/local-media/${id}.mp4`;video.load();absent.hidden=false;absent.textContent='学生画面加载中';student.src=`/local-media/student/${id}.mp4`;student.load();status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
@@ -66,7 +74,10 @@ export function mountRealRecording(root,{toast}) {
     if(ds.realSeek){e.stopImmediatePropagation();seek(Number(ds.realSeek));return;}
     if(!['play','mute','fit','layout','captions','segment','download'].includes(ds.recAction))return;
     e.stopImmediatePropagation();
-    if(ds.recAction==='play'){if(!video.paused)video.pause();else try{await video.play();status();}catch{status('视频无法播放，请检查本地视频服务');}}
+    if(ds.recAction==='play'){
+      if(root.classList.contains('real-video-unavailable')){toast('当前为课堂画面预览');return;}
+      if(!video.paused)video.pause();else try{await video.play();status();}catch{useStaticPreview();toast('当前为课堂画面预览');}
+    }
     if(ds.recAction==='mute'){video.muted=!video.muted;b.classList.toggle('is-muted',video.muted);b.setAttribute('aria-pressed',video.muted);b.setAttribute('aria-label',video.muted?'取消静音':'静音');}
     if(ds.recAction==='fit'){const contain=$('.recording-feeds').classList.toggle('contain');b.setAttribute('aria-pressed',contain);b.setAttribute('aria-label',contain?'填充显示画面':'完整显示画面');}
     if(ds.recAction==='layout'){const single=$('.recording-feeds').classList.toggle('single');b.setAttribute('aria-pressed',single);b.setAttribute('aria-label',single?'切换为三分屏':'切换为导播单画面');}
@@ -77,7 +88,7 @@ export function mountRealRecording(root,{toast}) {
   tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();e.stopImmediatePropagation();const names=['evaluation','transcript','knowledge'];const i=names.indexOf(activeTab);switchTab(e.key==='Home'?names[0]:e.key==='End'?names[2]:names[(i+(e.key==='ArrowRight'?1:2))%3]);tabs.querySelector('[aria-selected=true]').focus();},true);
   video.addEventListener('loadedmetadata',()=>{video.playbackRate=Number($('.recording-speed select').value);seek(pendingTime);pendingTime=0;sync();});
   for(const event of ['timeupdate','play','pause','ended','seeked'])video.addEventListener(event,sync);
-  video.addEventListener('error',()=>status('视频加载失败，请使用本地视频服务打开报告'));
+  video.addEventListener('error',useStaticPreview);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)video.pause();});
   new MutationObserver(()=>{if(root.hidden)video.pause();}).observe(root,{attributes:true,attributeFilter:['hidden']});
   select(1);
