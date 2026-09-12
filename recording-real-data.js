@@ -1,7 +1,5 @@
 export const realVideos = [
-  {id:1, title:'第1段', start:'13:25:10', duration:3290.157},
-  {id:2, title:'第2段', start:'14:21:10', duration:3290.135},
-  {id:3, title:'第3段', start:'15:17:10', duration:3290.101},
+  {id:1, title:'本节课堂录像', start:'13:25:10', duration:3290.168},
 ];
 // Manually checked screenshot timestamps, NOT segment start/end or PPT dwell durations.
 export const realKnowledge = [

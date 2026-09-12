@@ -1,5 +1,6 @@
 import {recordingRealVersion} from './recording-real-version.js';
 import {realVideos,realKnowledge} from './recording-real-data.js';
+import {recordingTranscript} from './recording-transcript-data.js';
 
 export function mountRealRecording(root,{toast}) {
   if(recordingRealVersion==='baseline')return;
@@ -49,11 +50,21 @@ export function mountRealRecording(root,{toast}) {
   const panel=document.createElement('section');panel.id='recording-knowledge';panel.className='recording-side-panel';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',tab.id);panel.hidden=true;
   panel.innerHTML='<div class="real-knowledge-tools"><label><input type="search" class="real-search" aria-label="搜索知识点" placeholder="搜索知识点"></label></div><div class="real-knowledge-list"></div>';
   $('.recording-sidebar').append(panel);
-  const missing=document.createElement('p');missing.className='recording-empty real-transcript-empty';missing.textContent='暂无本段录像的语音转写';$('#recording-transcript').append(missing);
+  const transcriptPanel=$('#recording-transcript');
+  transcriptPanel.innerHTML='<div class="recording-transcript-tools"><label><span class="sr-only">搜索转写内容</span><input type="search" class="real-transcript-search" placeholder="搜索转写内容" aria-label="搜索转写内容"></label><div><span>点击转写内容定位播放</span><span class="recording-follow">已按时间校对</span></div></div><div class="recording-transcript-scroll real-transcript-scroll"></div><div class="recording-transcript-footer"><span class="recording-transcript-count"></span><button class="text-button" data-rec-action="download">下载转写</button></div>';
   // Attendance placeholder removed per confirmed layout.
   const picker=document.createElement('span');picker.className='real-segment-picker';picker.innerHTML=realVideos.map(v=>`<button type="button" data-real-video="${v.id}" aria-pressed="${v.id===1}">${v.title} · ${v.start}</button>`).join('');$('.recording-segments').append(picker);
   const feedback=document.createElement('div');feedback.className='real-playback-status';feedback.setAttribute('role','status');feedback.hidden=true;$('.recording-player').append(feedback);
   function status(text=''){feedback.textContent=text;feedback.hidden=!text;}
+  let hls;
+  function loadRemoteVideo(time=0){
+    const source='./assets/recording-video/master.m3u8';
+    const start=()=>{video.currentTime=time;video.load();};
+    if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=source;start();return;}
+    const attach=()=>{hls=new window.Hls({enableWorker:true});hls.loadSource(source);hls.attachMedia(video);hls.on(window.Hls.Events.MANIFEST_PARSED,()=>{video.currentTime=time;});hls.on(window.Hls.Events.ERROR,(_event,data)=>{if(data.fatal)useStaticPreview();});};
+    if(window.Hls){attach();return;}
+    const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js';script.onload=attach;script.onerror=useStaticPreview;document.head.append(script);
+  }
   function useStaticPreview(){
     root.classList.add('real-video-unavailable');
     video.hidden=true;
@@ -62,9 +73,10 @@ export function mountRealRecording(root,{toast}) {
     absent.hidden=true;
     status();
   }
-  function render(){const q=$('.real-search').value.trim();const entries=realKnowledge.filter(k=>k.video===selected&&k.title.includes(q));$('.real-knowledge-list').innerHTML=entries.length?entries.map(k=>`<button type="button" class="real-knowledge-item" data-real-seek="${k.time}"><img src="${k.image}" alt="${k.title}课件截图"><span class="real-ppt-copy"><strong>${k.title}</strong><span class="real-ppt-meta"><time>${fmt(k.time)}</time>${Number.isFinite(k.dwellSeconds)?`<span>停留 ${Math.floor(k.dwellSeconds/60)}分${k.dwellSeconds%60?`${k.dwellSeconds%60}秒`:""}</span>`:""}${k.hasBoard===true?'<span class="real-ppt-board">板书</span>':""}</span></span></button>`).join(''):'<p class="recording-empty">没有匹配的知识点</p>';sync();}
+  function renderTranscript(){const query=$('.real-transcript-search').value.trim();const current=video.currentTime||0;const rows=recordingTranscript.filter(row=>`${row.speaker}${row.text}`.includes(query));$('.real-transcript-scroll').innerHTML=rows.length?rows.map(row=>`<button type="button" class="recording-transcript-item ${current>=row.time&&(recordingTranscript[recordingTranscript.indexOf(row)+1]?.time??Infinity)>current?'active':''}" data-real-seek="${row.time}"><span><strong>${row.speaker}</strong><time>${fmt(row.time)}</time></span><p>${row.text}</p></button>`).join(''):'<p class="recording-empty">没有找到相关内容，请尝试其他关键词。</p>';$('.recording-transcript-count').textContent=`共 ${rows.length} 条转写`;}
+  function render(){const q=$('.real-search').value.trim();const entries=realKnowledge.filter(k=>k.video===selected&&k.title.includes(q));$('.real-knowledge-list').innerHTML=entries.length?entries.map(k=>`<button type="button" class="real-knowledge-item" data-real-seek="${k.time}"><img src="${k.image}" alt="${k.title}课件截图"><span class="real-ppt-copy"><strong>${k.title}</strong><span class="real-ppt-meta"><time>${fmt(k.time)}</time>${Number.isFinite(k.dwellSeconds)?`<span>停留 ${Math.floor(k.dwellSeconds/60)}分${k.dwellSeconds%60?`${k.dwellSeconds%60}秒`:""}</span>`:""}${k.hasBoard===true?'<span class="real-ppt-board">板书</span>':""}</span></span></button>`).join(''):'<p class="recording-empty">没有匹配的知识点</p>';renderTranscript();sync();}
   function sync(){const duration=Number.isFinite(video.duration)?video.duration:realVideos[selected-1].duration;const t=video.currentTime||0;$('#recording-seek').max=duration;$('#recording-seek').value=t;$('#recording-seek').setAttribute('aria-valuetext',`${fmt(t)}，总时长 ${fmt(duration)}`);$('#recording-time').textContent=`${fmt(t)} / ${fmt(duration)}`;const paths=$('.recording-progress-art').querySelectorAll('path');const x=1288*t/duration;paths[0].setAttribute('d',`M0 0H${x}V3.75875H0Z`);paths[1].setAttribute('d',`M${x} 0H1288V3.75875H${x}Z`);const play=$('[data-rec-action=play]');play.setAttribute('aria-label',video.paused?'播放':'暂停');play.querySelector('img').hidden=!video.paused;play.querySelector('span').hidden=video.paused;const matches=[...root.querySelectorAll('[data-real-seek]')];const current=matches.find(n=>Math.abs(Number(n.dataset.realSeek)-t)<2);matches.forEach(n=>{n.classList.toggle('active',n===current);if(n===current)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});}
-  function select(id,time=0){video.pause();student.pause();selected=id;pendingTime=time;video.src=`/local-media/${id}.mp4`;video.load();absent.hidden=false;absent.textContent='学生画面加载中';student.src=`/local-media/student/${id}.mp4`;student.load();status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
+  function select(id,time=0){video.pause();student.pause();if(hls){hls.destroy();hls=undefined;}selected=id;pendingTime=time;loadRemoteVideo(time);status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
   function seek(t){if(video.readyState<1){pendingTime=t;return;}video.currentTime=Math.max(0,Math.min(video.duration,t));sync();}
   function switchTab(name){activeTab=name;tabs.querySelectorAll('[role=tab]').forEach(b=>{const yes=(b.dataset.realTab||b.dataset.recTab)===name;b.setAttribute('aria-selected',yes);b.tabIndex=yes?0:-1;});$('#recording-evaluation').hidden=name!=='evaluation';$('#recording-transcript').hidden=name!=='transcript';panel.hidden=name!=='knowledge';}
   // Capture only playback/tab events so the original demo clock cannot simulate playback.
@@ -81,13 +93,14 @@ export function mountRealRecording(root,{toast}) {
     if(ds.recAction==='mute'){video.muted=!video.muted;b.classList.toggle('is-muted',video.muted);b.setAttribute('aria-pressed',video.muted);b.setAttribute('aria-label',video.muted?'取消静音':'静音');}
     if(ds.recAction==='fit'){const contain=$('.recording-feeds').classList.toggle('contain');b.setAttribute('aria-pressed',contain);b.setAttribute('aria-label',contain?'填充显示画面':'完整显示画面');}
     if(ds.recAction==='layout'){const single=$('.recording-feeds').classList.toggle('single');b.setAttribute('aria-pressed',single);b.setAttribute('aria-label',single?'切换为三分屏':'切换为导播单画面');}
-    if(ds.recAction==='captions'||ds.recAction==='download')toast('暂无本段录像的语音转写');
+    if(ds.recAction==='captions')toast('当前录像未提供字幕轨道，请查看右侧语音转写');
+    if(ds.recAction==='download'){const content=recordingTranscript.map(row=>`[${fmt(row.time)}] ${row.speaker}\n${row.text}`).join('\n\n');const url=URL.createObjectURL(new Blob([`智慧医疗创新体验 · 语音转写\n\n${content}`],{type:'text/plain;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='智慧医疗创新体验-语音转写.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('转写文本已下载');}
   },true);
-  root.addEventListener('input',e=>{if(e.target.id==='recording-seek'){e.stopImmediatePropagation();seek(Number(e.target.value));}if(e.target.matches('.real-search')){e.stopImmediatePropagation();render();}},true);
+  root.addEventListener('input',e=>{if(e.target.id==='recording-seek'){e.stopImmediatePropagation();seek(Number(e.target.value));}if(e.target.matches('.real-search')){e.stopImmediatePropagation();render();}if(e.target.matches('.real-transcript-search')){e.stopImmediatePropagation();renderTranscript();}},true);
   root.addEventListener('change',e=>{if(e.target.matches('.recording-speed select')){e.stopImmediatePropagation();video.playbackRate=Number(e.target.value);}},true);
   tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();e.stopImmediatePropagation();const names=['evaluation','transcript','knowledge'];const i=names.indexOf(activeTab);switchTab(e.key==='Home'?names[0]:e.key==='End'?names[2]:names[(i+(e.key==='ArrowRight'?1:2))%3]);tabs.querySelector('[aria-selected=true]').focus();},true);
   video.addEventListener('loadedmetadata',()=>{video.playbackRate=Number($('.recording-speed select').value);seek(pendingTime);pendingTime=0;sync();});
-  for(const event of ['timeupdate','play','pause','ended','seeked'])video.addEventListener(event,sync);
+  for(const event of ['timeupdate','play','pause','ended','seeked'])video.addEventListener(event,()=>{sync();if(activeTab==='transcript')renderTranscript();});
   video.addEventListener('error',useStaticPreview);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)video.pause();});
   new MutationObserver(()=>{if(root.hidden)video.pause();}).observe(root,{attributes:true,attributeFilter:['hidden']});

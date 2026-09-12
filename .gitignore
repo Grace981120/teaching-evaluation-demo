@@ -10,3 +10,7 @@ node_modules/
 .agents/
 dist/
 .netlify/
+
+# Local full-quality source HLS; do not commit or publish in the site build.
+assets/recording-video/
+assets/recording-video-web/
