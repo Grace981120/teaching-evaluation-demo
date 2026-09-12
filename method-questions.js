@@ -1,8 +1,8 @@
 import {methodData as originalMethodData,methodTime,methodDuration,rowDuration} from './method-data.js';
 import {questionData,bloomLabels,matLabels,levelLabels,levelNotes,feedbackLabels,strategyLabels,summarize} from './method-questions-data.js';
 import {questionStyles} from './method-questions-styles.js';
-import {teachingQuestionsVersion} from './method-questions-version.js';
-import {mountQuestions108} from './method-questions-v108.js';
+import {teachingQuestionsVersion} from './method-questions-version.js?v=20260912-5';
+import {mountQuestions108} from './method-questions-v108.js?v=20260912-5';
 import {donutSegmentAttributes} from './attitude.js';
 const colors=['#1d70f2','#00cc7e','#e545d2','#ff7626','#ffb743','#19abea'];
 const soloColors=colors;

@@ -1,6 +1,13 @@
 [build]
   command = "python3 scripts/build-site.py"
   publish = "dist"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/agent/chat"
+  to = "/.netlify/functions/agent-chat"
+  status = 200
+  force = true
 
 [[edge_functions]]
   function = "access"

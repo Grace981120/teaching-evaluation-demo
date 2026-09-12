@@ -6,6 +6,7 @@ export function mountRealRecording(root,{toast}) {
   if(recordingRealVersion==='baseline')return;
   root.classList.add('real-recording');
   root.classList.add('real-video-pending');
+  const screenshotMode=recordingRealVersion==='screenshots-1.0';
   const $=s=>root.querySelector(s), fmt=t=>{t=Math.floor(t||0);return `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`;};
   const link=document.createElement('link');link.rel='stylesheet';link.href='./recording-real.css';document.head.append(link);
   let selected=1,activeTab='evaluation',pendingTime=0;
@@ -52,7 +53,7 @@ export function mountRealRecording(root,{toast}) {
   panel.innerHTML='<div class="real-knowledge-tools"><label><input type="search" class="real-search" aria-label="搜索知识点" placeholder="搜索知识点"></label></div><div class="real-knowledge-list"></div>';
   $('.recording-sidebar').append(panel);
   const transcriptPanel=$('#recording-transcript');
-  transcriptPanel.innerHTML='<div class="recording-transcript-tools"><label><span class="sr-only">搜索转写内容</span><input type="search" class="real-transcript-search" placeholder="搜索转写内容" aria-label="搜索转写内容"></label><div><span>点击转写内容定位播放</span><span class="recording-follow">已按时间校对</span></div></div><div class="recording-transcript-scroll real-transcript-scroll"></div><div class="recording-transcript-footer"><span class="recording-transcript-count"></span><button class="text-button" data-rec-action="download">下载转写</button></div>';
+  transcriptPanel.innerHTML='<div class="recording-transcript-tools"><label><span class="sr-only">搜索转写内容</span><input type="search" class="real-transcript-search" placeholder="搜索转写内容" aria-label="搜索转写内容"></label></div><div class="recording-transcript-scroll real-transcript-scroll"></div><div class="recording-transcript-footer"><span class="recording-transcript-count"></span><button class="text-button" data-rec-action="download">下载转写</button></div>';
   // Attendance placeholder removed per confirmed layout.
   const picker=document.createElement('span');picker.className='real-segment-picker';picker.innerHTML=realVideos.map(v=>`<button type="button" data-real-video="${v.id}" aria-pressed="${v.id===1}">${v.title} · ${v.start}</button>`).join('');$('.recording-segments').append(picker);
   const feedback=document.createElement('div');feedback.className='real-playback-status';feedback.setAttribute('role','status');feedback.hidden=true;$('.recording-player').append(feedback);
@@ -80,7 +81,16 @@ export function mountRealRecording(root,{toast}) {
   function sync(){const duration=Number.isFinite(video.duration)?video.duration:realVideos[selected-1].duration;const t=video.currentTime||0;$('#recording-seek').max=duration;$('#recording-seek').value=t;$('#recording-seek').setAttribute('aria-valuetext',`${fmt(t)}，总时长 ${fmt(duration)}`);$('#recording-time').textContent=`${fmt(t)} / ${fmt(duration)}`;const paths=$('.recording-progress-art').querySelectorAll('path');const x=1288*t/duration;paths[0].setAttribute('d',`M0 0H${x}V3.75875H0Z`);paths[1].setAttribute('d',`M${x} 0H1288V3.75875H${x}Z`);const play=$('[data-rec-action=play]');play.setAttribute('aria-label',video.paused?'播放':'暂停');play.querySelector('img').hidden=!video.paused;play.querySelector('span').hidden=video.paused;const matches=[...root.querySelectorAll('[data-real-seek]')];const current=matches.find(n=>Math.abs(Number(n.dataset.realSeek)-t)<2);matches.forEach(n=>{n.classList.toggle('active',n===current);if(n===current)n.setAttribute('aria-current','true');else n.removeAttribute('aria-current');});}
   let mediaLoaded=false;
   function select(id,time=0){video.pause();student.pause();if(hls){hls.destroy();hls=undefined;}selected=id;pendingTime=time;mediaLoaded=false;root.classList.add('real-video-pending');status();root.querySelectorAll('[data-real-video]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.realVideo)===id));render();}
-  function seek(t){if(video.readyState<1){pendingTime=t;return;}video.currentTime=Math.max(0,Math.min(video.duration,t));sync();}
+  function showScreenshot(t){
+    const entry=realKnowledge.filter(k=>k.video===selected&&k.time<=t).at(-1);
+    const img=$('.recording-screen>img');
+    img.hidden=!entry;
+    if(entry){img.src=entry.image;img.alt=`电脑画面原帧：${entry.title} · ${fmt(entry.time)}`;}
+    $('#recording-time').textContent=`${fmt(t)} / ${fmt(realVideos[selected-1].duration)}`;
+    $('#recording-seek').value=t;
+    panel.querySelectorAll('[data-real-seek]').forEach(el=>el.classList.toggle('active',entry&&Number(el.dataset.realSeek)===entry.time));
+  }
+  function seek(t){if(video.readyState<1){pendingTime=t;if(screenshotMode)showScreenshot(t);return;}video.currentTime=Math.max(0,Math.min(video.duration,t));sync();}
   function switchTab(name){activeTab=name;tabs.querySelectorAll('[role=tab]').forEach(b=>{const yes=(b.dataset.realTab||b.dataset.recTab)===name;b.setAttribute('aria-selected',yes);b.tabIndex=yes?0:-1;});$('#recording-evaluation').hidden=name!=='evaluation';$('#recording-transcript').hidden=name!=='transcript';panel.hidden=name!=='knowledge';}
   // Capture only playback/tab events so the original demo clock cannot simulate playback.
   root.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;const ds=b.dataset;
@@ -90,6 +100,7 @@ export function mountRealRecording(root,{toast}) {
     if(!['play','mute','fit','layout','captions','segment','download'].includes(ds.recAction))return;
     e.stopImmediatePropagation();
     if(ds.recAction==='play'){
+      if(screenshotMode){toast('当前展示真实课堂截图，请在PPT中选择电脑画面');return;}
       if(!mediaLoaded){mediaLoaded=true;root.classList.remove('real-video-pending');loadRemoteVideo(pendingTime,true);status('正在加载原课堂录像…');return;}
       if(root.classList.contains('real-video-unavailable')){toast('当前为课堂画面预览');return;}
       if(!video.paused)video.pause();else try{await video.play();status();}catch{useStaticPreview();toast('当前为课堂画面预览');}
@@ -109,4 +120,15 @@ export function mountRealRecording(root,{toast}) {
   document.addEventListener('visibilitychange',()=>{if(document.hidden)video.pause();});
   new MutationObserver(()=>{if(root.hidden)video.pause();}).observe(root,{attributes:true,attributeFilter:['hidden']});
   select(1);
+  if(screenshotMode){
+    useStaticPreview();
+    $('.recording-teacher>img').src='assets/recording-screen-20260912/teacher-1440.jpg';
+    $('.recording-teacher>img').alt='教师全景原帧 · 24:00';
+    $('.recording-students>img').src='assets/recording-screen-20260912/student-1440.jpg';
+    $('.recording-students>img').alt='学生全景原帧 · 24:00';
+    $('.recording-teacher figcaption').textContent='教师全景 · 24:00';
+    $('.recording-students figcaption').textContent='学生全景 · 24:00';
+    $('[data-rec-action=play]').setAttribute('aria-label','课堂截图预览');
+    seek(1440);switchTab('knowledge');
+  }
 }

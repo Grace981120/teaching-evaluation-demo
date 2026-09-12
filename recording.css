@@ -21,10 +21,10 @@
 .recording-submit-bar{box-shadow:0 -4px 12px #18263c05}
 @media(min-width:1101px){
   .recording-layout{height:max(480px,calc(100dvh - 104px));align-items:stretch}
-  .recording-main{display:flex;flex-direction:column;min-height:0}
-  .recording-video-card{display:flex;flex-direction:column;flex:1;min-height:0}
+  .recording-main{display:block;height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+  .recording-video-card{display:flex;flex-direction:column;flex:none;min-height:0}
   .recording-heading,.recording-segments,.recording-stat-card{flex-shrink:0}
-  .recording-player:not(:fullscreen){flex:1 1 0;width:100%;min-height:100px;aspect-ratio:auto;container-type:size}
+  .recording-player:not(:fullscreen){flex:none;width:100%;height:auto;min-height:360px;aspect-ratio:1288/515;container-type:size}
   .recording-layout:not(.sidebar-collapsed) .recording-sidebar{height:100%;min-height:0;max-height:none;contain:size}
   .recording-player:not(:fullscreen) .recording-feeds{inset:auto;left:50%;top:calc((100% - 56px)/2);transform:translate(-50%,-50%);width:min(100cqw,calc((100cqh - 56px)*1288/452.442));height:auto;aspect-ratio:1288/452.442}
   .sidebar-collapsed .recording-sidebar{align-self:start}

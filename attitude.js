@@ -1,4 +1,5 @@
 import {bindChartHover} from './chart-interactions.js';
+import {mountAttitudeIteration} from './attitude-iteration.js';
 import {mountTeachingPose} from './attitude-pose.js';
 import {mountTeacherEmotion} from './attitude-emotion.js';
 import {mountClassroomManagement} from './attitude-management.js';
@@ -49,8 +50,8 @@ function managementChart() {
 
 export function initAttitude({openDialog}) {
   const root = document.querySelector('#attitude');
-  root.innerHTML = `<section class="card attitude-summary"><div><h1>教学态度 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div><span class="attitude-summary-label">本课节分析</span></section>
-  <section class="card section" id="attitude-basics" aria-labelledby="basics-title">${sectionHead('basics','基础情况','点击指标，查看课堂记录')}<div class="basic-grid">${data.basics.map((b,i)=>`<button class="basic-stat" data-basic="${i}" aria-label="${b.label}：${b.value}${b.unit||''}，查看记录"><strong class="${b.unit?'basic-count':b.value==='无'?'basic-none':''}">${b.value}${b.unit?`<small>${b.unit}</small>`:''}</strong><span>${b.label}</span>${b.status==='待核查'?'<i class="review-dot" title="待核查"></i>':''}</button>`).join('')}</div></section>
+  root.innerHTML = `<section class="card attitude-summary"><div><h1>教学态度 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div></section>
+  <section class="card section" id="attitude-basics" aria-labelledby="basics-title">${sectionHead('basics','基础情况')}<div class="basic-grid">${data.basics.map((b,i)=>`<button class="basic-stat" data-basic="${i}" aria-label="${b.label}：${b.value}${b.unit||''}，查看记录"><strong class="${b.unit?'basic-count':b.value==='无'?'basic-none':''}">${b.value}${b.unit?`<small>${b.unit}</small>`:''}</strong><span>${b.label}</span>${b.status==='待核查'?'<i class="review-dot" title="待核查"></i>':''}</button>`).join('')}</div></section>
   <section class="card section" id="attitude-body" aria-labelledby="body-title">${sectionHead('body','肢体语言')}${insight('教师课堂上使用了<strong>丰富的肢体语言</strong>，不仅增强了表达效果，还使课堂充满活力。')}${bodyChart()}</section>
   <section class="card section" id="attitude-posture" aria-labelledby="posture-title">${sectionHead('posture','教学姿态')}${insight('教师高度敬业：全程主导（93% 站立）体现强烈责任心；走动教学（31%）显著增强互动与课堂活力。')}${postureChart()}</section>
   <section class="card section" id="attitude-patrol" aria-labelledby="patrol-title">${sectionHead('patrol','巡堂轨迹')}${insight('讲台区调度自如体现教学节奏掌控力，学生区介入稍显不足；建议增加个性化指导频率以强化走动互动的深度覆盖。')}${patrolChart()}</section>
@@ -120,4 +121,5 @@ export function initAttitude({openDialog}) {
     clear:()=>{root.querySelector('#body-crosshair').setAttribute('opacity','0');root.querySelector('#body-marker').setAttribute('opacity','0');}
   });
   mountTeachingPose(root);
+  mountAttitudeIteration(root,{openDialog});
 }

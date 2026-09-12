@@ -1,6 +1,7 @@
 import {contentData as data} from './content-data.js';
 import {teachingContentVersion} from './content-quality-version.js';
 import {mountTeachingGoals} from './content-goals.js';
+import {mountContentAccuracy} from './content-accuracy.js';
 
 const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset = name => `assets/figma/content-${name}.svg`;
@@ -28,10 +29,11 @@ export function initContent({openDialog}) {
     features:`<div class="content-feature-grid">${data.features.map((f,i)=>`<article class="content-detail-card"><h3>${f.name}</h3>${exampleRows(f.examples,'features',i)}</article>`).join('')}</div>`,
     practice:`<div class="content-practice-grid">${data.practice.map((p,i)=>`<article class="content-detail-card"><span class="content-label">知识</span><h3>${p.knowledge}</h3><span class="content-label">案例</span>${exampleRows(p.examples,'practice',i)}</article>`).join('')}</div>`
   };
-  root.innerHTML=`<section class="card attitude-summary"><div><h1>教学内容 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div><span class="attitude-summary-label">本课节分析</span></section>
+  root.innerHTML=`<section class="card attitude-summary"><div><h1>教学内容 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div></section>
     ${data.sections.map(s=>`<section class="card section" id="content-${s.id}" aria-labelledby="content-${s.id}-title"><div class="section-heading"><h2 id="content-${s.id}-title">${s.name}</h2></div><div class="attitude-insight"><img src="${asset('img111111')}" width="16" height="16" alt=""><p>${s.id==='goals'?`共呈现 ${data.goals.length} 个${contentV12?'教学目标':'课程目标'}。`:''}${s.summary}</p></div>${contents[s.id]}</section>`).join('')}
     <footer><span></span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
   mountTeachingGoals(root);
+  mountContentAccuracy(root);
   root.addEventListener('click',event=>{
     const button=event.target.closest('[data-content-node],[data-content-all],[data-content-example]');
     if(!button) return;

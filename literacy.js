@@ -6,7 +6,7 @@ const note = '<div class="dialog-note">本页保留设计稿中各维度重复�
 
 export function initLiteracy({openDialog}) {
   const root=document.querySelector('#literacy');
-  root.innerHTML=`<section class="card attitude-summary"><div><h1>教学素养 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div><span class="attitude-summary-label">本课节分析</span></section>
+  root.innerHTML=`<section class="card attitude-summary"><div><h1>教学素养 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div></section>
     <section class="card section" aria-labelledby="literacy-analysis-title">
       <div class="section-heading"><h2 id="literacy-analysis-title">教学素养</h2></div>
       <div class="attitude-insight"><img src="${asset('ai')}" width="16" height="16" alt=""><p>${data.insight}</p></div>

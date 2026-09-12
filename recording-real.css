@@ -5,6 +5,7 @@
 #recording.real-recording:not(.real-video-unavailable) .recording-teacher{grid-column:1;grid-row:1}
 #recording.real-recording:not(.real-video-unavailable) .recording-students,#recording.real-recording:not(.real-video-unavailable) .recording-screen{display:none}
 #real-classroom-video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
+#recording.real-recording .recording-screen>img{object-fit:contain;background:#000}
 #recording.real-recording .recording-feeds figcaption{z-index:1}
 #recording.real-recording .recording-screen canvas{display:block;width:100%;height:100%;object-fit:cover;background:#000}
 #recording.real-recording.real-video-unavailable #real-classroom-video,#recording.real-recording.real-video-unavailable #real-student-video,#recording.real-recording.real-video-unavailable .recording-screen canvas,#recording.real-recording.real-video-unavailable .real-feed-empty{display:none!important}

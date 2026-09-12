@@ -8,8 +8,8 @@ export const question108Styles=`
 #method-questions .uq-timeline .method-timeline-row{margin:0;grid-template-columns:66px minmax(0,1fr) 74px}
 #method-questions .uq-timeline .method-axis{margin-top:8px}
 #method-questions .uq-segment{background:#1d70f2;min-width:3px}
-#method-questions .uq-segment .uq-topic{position:absolute;left:0;bottom:20px;max-width:140px;width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-size:11px;line-height:18px;font-weight:400;color:var(--muted)}
-#method-questions .uq-segment:hover .uq-topic,#method-questions .uq-segment:focus-visible .uq-topic{color:#1d70f2}
+#method-questions .uq-chain{min-width:0;height:12px;border-radius:2px}
+#method-questions .uq-chain:hover{filter:brightness(.92);box-shadow:0 0 0 2px #c4dbff}
 #method-questions .uq-total{padding:0;text-align:left;color:var(--muted)}
 #method-questions .uq-total:hover{color:#1d70f2}
 #method-questions .uq-stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;border-top:1px solid #e8edf5;margin-top:24px;padding-top:24px}

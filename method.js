@@ -1,5 +1,5 @@
-import {mountTeachingInteraction} from './method-interaction.js';
-import {mountTeachingQuestions} from './method-questions.js';
+import {mountTeachingInteraction} from './method-interaction.js?v=20260912-12';
+import {mountTeachingQuestions} from './method-questions.js?v=20260912-5';
 import {mountTeachingLanguage} from './method-language.js';
 import {mountTeachingBoard} from './method-board.js';
 import {mountTeachingMultimedia} from './method-multimedia.js';
@@ -35,7 +35,7 @@ export function initMethod({openDialog}){
   interaction:`<div class="method-interaction-grid">${[['st','S-T分析'],['rt','Rt-Ch分析']].map(([key,title])=>`<div><h3>${title}<button class="method-info" data-method-info="${key}" aria-label="${title}说明">${img('interaction-imgIcon',11.667,11.667)}</button></h3><button class="method-chart-button" data-method-info="${key}" aria-label="查看${title}详情">${interactionChart(key)}</button></div>`).join('')}</div>`,
   homework:`<div class="method-homework-grid">${data.homework.map((h,i)=>`<button class="method-homework-card ${h.available?'':'is-missing'}" data-method-homework="${i}" aria-label="${h.name}：${h.available?'已识别':'未识别'}，查看详情"><span>${img(h.available?'homework-img':'homework-img2',16,16)}<strong>${h.name}</strong></span><span class="method-detail-link">查看详情${img(h.available?'homework-img1':'homework-img3',12,12)}</span></button>`).join('')}</div>`
  };
- root.innerHTML=`<section class="card attitude-summary"><div><h1>教学方法 <strong>${data.score}</strong><span class="tag orange">可提升</span></h1><p>${data.summary}</p></div><span class="attitude-summary-label">本课节分析</span></section>${data.sections.map(s=>`<section class="card section" id="method-${s.id}" aria-labelledby="method-${s.id}-title"><div class="section-heading"><h2 id="method-${s.id}-title">${s.name}</h2></div>${s.summary?`<div class="attitude-insight">${img('behavior-img111111',16,16.018)}<p>${s.summary}</p></div>`:''}${sectionBody[s.id]}</section>`).join('')}<footer><span><span class="status-dot"></span>DEMO · 示例分析 · 时间轴 150 分钟 · 斜纹为未分析片段</span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
+ root.innerHTML=`<section class="card attitude-summary"><div><h1>教学方法 <strong>${data.score}</strong><span class="tag orange">可提升</span></h1><p>${data.summary}</p></div></section>${data.sections.filter(s=>!['behavior','language'].includes(s.id)).map(s=>`<section class="card section" id="method-${s.id}" aria-labelledby="method-${s.id}-title"><div class="section-heading"><h2 id="method-${s.id}-title">${s.name}</h2></div>${s.summary?`<div class="attitude-insight">${img('behavior-img111111',16,16.018)}<p>${s.summary}</p></div>`:''}${sectionBody[s.id]}</section>`).join('')}<footer><span><span class="status-dot"></span>DEMO · 示例分析 · 时间轴 150 分钟 · 斜纹为未分析片段</span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
  let mode='bloom';
  function setMode(next){mode=next;root.querySelectorAll('[data-method-mode]').forEach(b=>{b.setAttribute('aria-selected',String(b.dataset.methodMode===mode));b.tabIndex=b.dataset.methodMode===mode?0:-1;});const panel=root.querySelector('#method-classification-panel');panel.innerHTML=classification(mode);panel.setAttribute('aria-labelledby',mode==='bloom'?'method-bloom-tab':'method-mat-tab');}
  function show(title,body){openDialog(title,body+note,'教学方法 / 分析详情');}
@@ -61,4 +61,8 @@ export function initMethod({openDialog}){
  mountTeachingLanguage(root.querySelector('#method-language'),{openDialog});
  mountTeachingBoard(root.querySelector('#method-board'),openDialog);
  mountTeachingMultimedia(root.querySelector('#method-board'));
+ ['multimedia','interaction','questions','board','homework'].forEach(id=>{
+  const section=root.querySelector('#method-'+id);if(section)root.append(section);
+ });
+ root.querySelector('footer')&&root.append(root.querySelector('footer'));
 }

@@ -1,1 +1,1 @@
-export const recordingRealVersion = 'baseline';
+export const recordingRealVersion = 'screenshots-1.0';

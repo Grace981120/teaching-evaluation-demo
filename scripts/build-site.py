@@ -14,6 +14,7 @@ for pattern in ("*.html", "*.css", "*.js"):
     for source in root.glob(pattern):
         shutil.copy2(source, output / source.name)
 shutil.copytree(root / "assets", output / "assets", ignore=shutil.ignore_patterns("recording-video-web", "recording-video-web-final", "recording-video-published"))
+shutil.copytree(root / "agent-assets", output / "agent-assets")
 for manifest in (output / "assets" / "figma").glob("*manifest.json"):
     manifest.unlink()
 print(f"Built {sum(p.is_file() for p in output.rglob('*'))} static files")

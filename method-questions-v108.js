@@ -23,6 +23,15 @@ export function mountQuestions108(root,source=questionData){
   const original=root.innerHTML;
   const model=source===questionData?{...source,questions:[...source.questions,studentQuestion]}:source;
   const questions=[...model.questions].sort((a,b)=>a.start-b.start);
+  // 主问题链将首问、候答、学生应答和教师跟进视作一个完整课堂片段；零散追问不单列色块。
+  const questionChains=[
+    {questionId:'q1',start:1050,end:1450,topic:'RAG更新方式'},
+    {questionId:'q5',start:2200,end:2540,topic:'检索与生成'},
+    {questionId:'q9',start:3300,end:3750,topic:'训练数据与测试集'},
+    {questionId:'q13',start:4520,end:4900,topic:'提示词的角色与任务'},
+    {questionId:'q17',start:5750,end:6200,topic:'应用场景与限制条件'},
+    {questionId:'q21',start:7150,end:7460,topic:'资料时效与核验依据'}
+  ];
   const isTeacher=q=>(q.initiator||q.turns[0]?.role||'teacher')==='teacher';
   const teachers=questions.filter(isTeacher);
   const answers=q=>model.answerStatus==='available'?q.turns.filter(t=>t.kind==='answer'&&t.role==='student'):[];
@@ -65,12 +74,11 @@ export function mountQuestions108(root,source=questionData){
     return `<div class="uq-stage-head"><h3>教师提问</h3><div class="mq-tabs" role="tablist" aria-label="提问分类方式">${[['bloom','布鲁姆分类'],['mat','4MAT模式']].map(([id,label])=>button(`id="uq-tab-${id}" role="tab" data-uq-mode="${id}" aria-selected="${mode===id}" aria-controls="uq-classification" tabindex="${mode===id?0:-1}"`,label,'')).join('')}</div></div><div class="uq-plot" id="uq-classification" role="tabpanel" aria-labelledby="uq-tab-${mode}"><div class="mq-classification-groups">${mode==='bloom'?`<span>初阶（${values.slice(0,3).reduce((a,b)=>a+b,0)}次）</span><span>高阶（${values.slice(3).reduce((a,b)=>a+b,0)}次）</span>`:'<span>四类提问</span>'}</div><div class="mq-bars">${labels.map((label,i)=>button(action(mode,label),`<span>${values[i]}次</span><i style="height:${values[i]/max*115}px;background:${colors[i]}"></i><small>${esc(label)}</small>`,'')).join('')}</div></div>`;
   }
   function timeline(){
-    const duration=Math.max(model.duration||0,...questions.map(q=>q.end),60);
-    let previousLabel=-20;
-    const segments=questions.map(q=>{const left=q.start/duration*100,width=(q.end-q.start)/duration*100;const show=left-previousLabel>=14&&left<88;if(show)previousLabel=left;
-      return button(`data-uq-event="${esc(q.id)}" aria-label="${esc(q.text)}，${time(q.start)}至${time(q.end)}" title="${esc(q.text)} · ${time(q.start)}–${time(q.end)}" style="left:${left}%;width:${Math.max(0,width)}%"`,show?`<span class="uq-topic">${esc(q.topic||q.text)}</span>`:'','uq-segment');
+    const duration=Math.max(model.duration||0,...questionChains.map(q=>q.end),60);
+    const segments=questionChains.map(chain=>{const left=chain.start/duration*100,width=(chain.end-chain.start)/duration*100;
+      return button(`data-uq-event="${esc(chain.questionId)}" aria-label="问题主题：${esc(chain.topic)}，问题链 ${time(chain.start)}至${time(chain.end)}" style="left:${left}%;width:${Math.max(0,width)}%"`,'','uq-segment uq-chain');
     }).join('');
-    return `<div class="uq-timeline-title"><h3>提问时序图</h3></div><div class="method-timeline-scroll" tabindex="0" aria-label="提问时序图，可横向滚动"><div class="method-timeline uq-timeline"><div class="method-timeline-row"><span class="method-row-name">问答片段</span><div class="method-track">${segments}</div>${button('data-uq-all aria-label="全部问答片段"',`${questions.length}个`,'method-row-duration uq-total')}</div><div class="method-axis">${Array.from({length:11},(_,i)=>`<span>${axisTime(duration*i/10)}</span>`).join('')}</div></div></div>`;
+    return `<div class="uq-timeline-title"><h3>提问时序图</h3></div><div class="method-timeline-scroll" tabindex="0" aria-label="提问时序图，可横向滚动"><div class="method-timeline uq-timeline"><div class="method-timeline-row"><span class="method-row-name">问题链</span><div class="method-track">${segments}</div>${button('data-uq-all aria-label="全部问题链"',`${questionChains.length}个`,'method-row-duration uq-total')}</div><div class="method-axis">${Array.from({length:11},(_,i)=>`<span>${axisTime(duration*i/10)}</span>`).join('')}</div></div></div>`;
   }
   function insight(){
     if(model.answerStatus!=='available')return '学生发言资料不足，暂不能判断回答结构与应答参与情况；可先核对已识别的教师问题。';

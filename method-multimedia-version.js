@@ -1,1 +1,1 @@
-export const teachingMultimediaVersion='1.8';
+export const teachingMultimediaVersion='1.8.1';

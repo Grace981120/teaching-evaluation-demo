@@ -4,6 +4,9 @@ from pathlib import Path
 import os
 import argparse
 import re
+import json
+import urllib.request
+import urllib.error
 from urllib.parse import urlparse
 
 
@@ -16,6 +19,57 @@ class DemoHandler(SimpleHTTPRequestHandler):
         '教师全景_智慧医疗创新体验_周晋_20240910_142110.mp4',
         '教师全景_智慧医疗创新体验_周晋_20240910_151710.mp4',
     ]
+
+    def do_POST(self):
+        if urlparse(self.path).path != '/api/agent/chat':
+            self.send_error(404)
+            return
+        api_key = os.environ.get('QWEN_API_KEY', '').strip()
+        if not api_key:
+            self.send_json(503, {'error': 'AI 服务尚未配置'})
+            return
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            payload = json.loads(self.rfile.read(length) or b'{}')
+            question = str(payload.get('question', '')).strip()
+            if not question:
+                self.send_json(400, {'error': '请输入问题'})
+                return
+            context = json.dumps({
+                'course': payload.get('course', '智慧医疗'),
+                'skill': payload.get('skill'),
+                'references': payload.get('references', [])[:10],
+                'asr': payload.get('asr', {})
+            }, ensure_ascii=False)
+            upstream = urllib.request.Request(
+                'https://narrows-gateway.test.seewo.com/v1/chat/completions',
+                data=json.dumps({
+                    'model': 'qwen3.7-flash',
+                    'messages': [
+                        {'role': 'system', 'content': '你是课堂教学评价助手。只依据提供的课堂报告、引用模块和转写回答；先给出有证据的判断，再给出具体建议。不要编造数据、原话或视频位置；证据不足时明确说明。回答简洁、专业。'},
+                        {'role': 'user', 'content': f'课堂上下文：\n{context}\n\n用户问题：{question}'}
+                    ],
+                    'temperature': 0.3,
+                    'stream': False
+                }, ensure_ascii=False).encode('utf-8'),
+                headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'}
+            )
+            with urllib.request.urlopen(upstream, timeout=45) as response:
+                result = json.loads(response.read())
+            content = result['choices'][0]['message']['content']
+            self.send_json(200, {'content': content})
+        except urllib.error.HTTPError as error:
+            self.send_json(502, {'error': 'AI 服务暂时不可用', 'status': error.code})
+        except (ValueError, KeyError, TimeoutError, urllib.error.URLError):
+            self.send_json(502, {'error': 'AI 服务暂时不可用'})
+
+    def send_json(self, status, payload):
+        body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def send_head(self):
         self.media_remaining = None

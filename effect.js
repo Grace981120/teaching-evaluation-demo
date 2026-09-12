@@ -2,6 +2,7 @@ import {bindChartHover} from './chart-interactions.js';
 import {effectData as data,effectColors,effectTime,effectDuration,rowDuration} from './effect-data.js';
 import {effectTraces} from './effect-chart-assets.js';
 import {donutSegmentAttributes} from './attitude.js';
+import {mountEffectIteration} from './effect-iteration.js';
 const asset=n=>`assets/figma/effect-${n}.svg`;
 const note='<div class="dialog-note">DEMO · 本页为设计稿中的独立课堂示例，与总览课程人数不同。曲线及统计用于交互演示，尚未接入视频或统一分析数据。</div>';
 function gauge(i){const g=data.gauges[i];return `<button class="effect-gauge" data-effect-gauge="${i}" aria-label="${g.name} ${g.value}%，查看详情"><span class="effect-gauge-plot"><img src="${asset('participation-imgEllipse1165')}" width="119.76" height="60" style="left:.12px;top:0" alt=""><img src="${asset(g.asset)}" width="${g.w}" height="${g.h}" style="left:${g.x}px;top:${g.y}px" alt=""><strong>${g.value}<small>%</small></strong><span>${g.name}</span></span></button>`;}
@@ -13,7 +14,7 @@ function expressionDonut(){let start=0;return `<div class="method-donut"><svg wi
 export function initEffect({openDialog}){
 const root=document.querySelector('#effect');
 const bodies={participation:`<div class="effect-participation-layout">${gauge(0)}${chart('participation')}</div>`,monitoring:`<h3 class="effect-monitoring-title">学情监测 <span>实到：27人</span></h3><div class="effect-gauge-grid">${data.gauges.slice(1).map((g,i)=>gauge(i+1)).join('')}</div><h3 class="effect-subheading">抬头率</h3>${chart('monitoring')}`,pyramid:`<div class="effect-split effect-pyramid-layout"><div><h3>学习行为分布</h3>${bars('learning','%')}</div><div><h3>学习行为时序图</h3>${learningTimeline()}</div></div>`,anomalies:bars('anomalies'),actions:`<div class="effect-split"><div><h3>学生动作分布</h3>${bars('actions')}</div><div><h3>学生实时动作</h3>${chart('actions')}</div></div>`,expressions:`<div class="effect-split"><div><h3>表情分布</h3>${expressionDonut()}</div><div><h3>学生实时表情</h3>${chart('expressions')}</div></div>`};
-root.innerHTML=`<section class="card attitude-summary"><div><h1>教学效果 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div><span class="attitude-summary-label">本课节分析</span></section>${data.sections.map(s=>`<section class="card section" id="effect-${s.id}" aria-labelledby="effect-${s.id}-title"><div class="section-heading"><h2 id="effect-${s.id}-title">${s.name}</h2></div><div class="attitude-insight"><img src="${asset('participation-img111111')}" width="16" height="16.018" alt=""><p>${s.summary}</p></div>${bodies[s.id]}</section>`).join('')}<footer><span><span class="status-dot"></span>DEMO · 设计稿示例 · 斜纹表示暂无分析数据</span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
+root.innerHTML=`<section class="card attitude-summary"><div><h1>教学效果 <strong>${data.score}</strong><span class="tag">优秀</span></h1><p>${data.summary}</p></div></section>${data.sections.map(s=>`<section class="card section" id="effect-${s.id}" aria-labelledby="effect-${s.id}-title"><div class="section-heading"><h2 id="effect-${s.id}-title">${s.name}</h2></div><div class="attitude-insight"><img src="${asset('participation-img111111')}" width="16" height="16.018" alt=""><p>${s.summary}</p></div>${bodies[s.id]}</section>`).join('')}<footer><span><span class="status-dot"></span>DEMO · 设计稿示例 · 斜纹表示暂无分析数据</span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
 const show=(title,body)=>openDialog(title,body+note,'教学效果 / 分析详情');
 root.addEventListener('click',event=>{
 const b=event.target.closest('[data-effect-gauge],[data-effect-bar],[data-effect-segment],[data-effect-expression],[data-effect-series]');if(!b)return;const ds=b.dataset,index=Number(ds.index);
@@ -32,4 +33,5 @@ root.querySelectorAll('.effect-chart').forEach(wrap=>bindChartHover({
   plot:wrap.querySelector('.effect-trace'),tooltip:wrap.querySelector('.chart-hover-tooltip'),max:150,
   inspect:minute=>updateChart(wrap,minute),clear:()=>wrap.querySelector('.effect-crosshair').setAttribute('visibility','hidden')
 }));
+mountEffectIteration(root,{openDialog});
 }

@@ -4,12 +4,14 @@ import {initLiteracy} from './literacy.js';
 import {effectData} from './effect-data.js';
 import {initEffect} from './effect.js';
 import {methodData} from './method-data.js';
-import {initMethod} from './method.js';
+import {initMethod} from './method.js?v=20260912-12';
 import {contentData} from './content-data.js';
 import {initContent} from './content.js';
-import {mountContentQuality} from './content-quality.js';
 import {attitudeData} from './attitude-data.js';
 import {initAttitude} from './attitude.js';
+import {mountOverviewOutline} from './overview-outline.js';
+import {mountOverviewIteration} from './overview-iteration.js?v=20260912-sync2';
+import {mountAgentIteration} from './agent-iteration.js?v=20260912-sync2';
 
 const dimensions = [
   {name:'教学态度',score:attitudeData.score,weight:25,description:'教学投入较高，考勤与课堂行为线索待核查。',insight:attitudeData.summary,metrics:attitudeData.sections.map(s=>[s.name,s.observation,s.status])},
@@ -118,7 +120,7 @@ function exportReport() {
 }
 document.addEventListener('click',event=>{
   const routeLink=event.target.closest('a[href^="#"]');
-  if(routeLink && /^#(recording|overview|attitude(?:-(?:basics|body|posture|patrol|management))?|content(?:-(?:goals|challenges|features|practice))?|method(?:-(?:behavior|language|questions|board|interaction|homework))?|literacy(?:-(?:critical|communication|collaboration|values))?|effect(?:-(?:participation|monitoring|pyramid|anomalies|actions|expressions))?)$/.test(routeLink.getAttribute('href'))) {
+  if(routeLink && /^#(recording|overview|attitude(?:-(?:basics|body|posture|patrol|management|investment|emotion|language))?|content(?:-(?:goals|challenges|features|practice|accuracy))?|method(?:-(?:behavior|language|questions|board|interaction|homework|multimedia))?|literacy(?:-(?:critical|communication|collaboration|values))?|effect(?:-(?:participation|monitoring|state|pyramid|anomalies|actions|expressions))?)$/.test(routeLink.getAttribute('href'))) {
     event.preventDefault();navigate(routeLink.getAttribute('href'));return;
   }
   const target = event.target.closest('button, [data-dimension]');
@@ -165,14 +167,15 @@ function navigate(hash) {
   renderRoute(true);
 }
 function renderRoute(scroll=false) {
-  const isAttitude=/^#attitude(?:-(basics|body|posture|patrol|management))?$/.test(location.hash);
-  const isContent=/^#content(?:-(goals|challenges|features|practice))?$/.test(location.hash);
-  const isMethod=/^#method(?:-(behavior|language|questions|board|interaction|homework))?$/.test(location.hash);
+  const isAttitude=/^#attitude(?:-(basics|body|posture|patrol|management|investment|emotion|language))?$/.test(location.hash);
+  const isContent=/^#content(?:-(goals|challenges|features|practice|accuracy))?$/.test(location.hash);
+  const isMethod=/^#method(?:-(behavior|language|questions|board|interaction|homework|multimedia))?$/.test(location.hash);
   const isLiteracy=/^#literacy(?:-(critical|communication|collaboration|values))?$/.test(location.hash);
-  const isEffect=/^#effect(?:-(participation|monitoring|pyramid|anomalies|actions|expressions))?$/.test(location.hash);
+  const isEffect=/^#effect(?:-(participation|monitoring|state|pyramid|anomalies|actions|expressions))?$/.test(location.hash);
   const page=location.hash==='#recording'?'recording':isAttitude?'attitude':isContent?'content':isMethod?'method':isEffect?'effect':isLiteracy?'literacy':'overview';
   if($('#detail-dialog').open) $('#detail-dialog').close();
   ['recording','overview','attitude','content','method','literacy','effect'].forEach(id=>{$('#'+id).hidden=id!==page;});
+  document.dispatchEvent(new Event('attitude:route'));
   document.querySelectorAll('.topbar a').forEach(link=>{
     const active=link.getAttribute('href')==='#'+page;
     link.classList.toggle('active',active);
@@ -180,7 +183,8 @@ function renderRoute(scroll=false) {
   });
   document.title=`${{recording:'课程实录',overview:'报告总览',attitude:'教学态度',content:'教学内容',method:'教学方法',literacy:'教学素养',effect:'教学效果'}[page]} · 课堂评价报告`;
   if(scroll) {
-    const target=page!=='overview' && location.hash!=='#'+page?document.getElementById(location.hash.slice(1)):null;
+    const attitudeTarget=$('#attitude').dataset.attitudeIteration?({'#attitude-posture':'attitude-body','#attitude-emotion':'attitude-investment'}[location.hash]):null;
+    const target=page!=='overview' && location.hash!=='#'+page?document.getElementById(attitudeTarget||location.hash.slice(1)):null;
     if(target) target.scrollIntoView({block:'start',behavior:'instant'});else window.scrollTo({top:0,behavior:'instant'});
     const heading=(target || $('#'+page)).querySelector('h1,h2,h3');
     heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});
@@ -188,4 +192,4 @@ function renderRoute(scroll=false) {
 }
 window.addEventListener('hashchange',()=>renderRoute(true));
 window.addEventListener('popstate',()=>renderRoute(true));
-renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();initAttitude({openDialog});initContent({openDialog});mountContentQuality($('#content'));initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});renderRoute(/^#literacy-/.test(location.hash));
+renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();mountOverviewOutline({openDialog});initAttitude({openDialog});initContent({openDialog});initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});mountOverviewIteration({openDialog});mountAgentIteration();renderRoute(/^#literacy-/.test(location.hash));

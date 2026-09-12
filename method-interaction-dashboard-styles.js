@@ -2,7 +2,7 @@
 export const interactionDashboardStyles=`
 #method-interaction .mi-module-analysis{display:flex;align-items:flex-start;gap:7px;margin:12px 0 20px;padding:11px 12px;border-radius:4px;background:#edf6ff;color:var(--secondary);font-size:12px;line-height:20px}
 #method-interaction .mi-module-analysis b{color:#1d70f2;font-size:15px;line-height:20px}
-#method-interaction .method-interaction-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+#method-interaction .method-interaction-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 #method-interaction .mi-dashboard-card{box-sizing:border-box;min-width:0;padding:20px!important;border:1px solid var(--border)!important;border-radius:8px!important;background:#fff}
 #method-interaction .mi-dashboard-head,#method-interaction .mi-dashboard-card.mi-inline .mi-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:32px;margin-bottom:0}
 #method-interaction .mi-dashboard-head h3,#method-interaction .mi-dashboard-card.mi-inline .mi-heading h3{display:flex;align-items:center;gap:4px;margin:0;font-size:14px;line-height:24px;font-weight:600;color:var(--primary)}
@@ -16,14 +16,6 @@ export const interactionDashboardStyles=`
 #method-interaction .mi-dashboard-card.mi-inline .mi-radar{margin-top:2px}
 #method-interaction .mi-dashboard-card.mi-inline .mi-radar svg{height:270px}
 #method-interaction .mi-dashboard-card.mi-inline .mi-legend{margin-top:-34px}
-#method-interaction .mi-positive-card{display:flex;flex-direction:column}
-#method-interaction .mi-positive-metrics{display:grid;grid-template-columns:1fr;margin-top:16px}
-#method-interaction .mi-positive-metrics>div{display:flex;align-items:center;justify-content:space-between;min-height:54px;border-bottom:1px solid var(--border)}
-#method-interaction .mi-positive-metrics>div:last-child{border-bottom:0}
-#method-interaction .mi-positive-metrics span{font-size:13px;line-height:22px;color:var(--muted)}
-#method-interaction .mi-positive-metrics strong{font-size:24px;line-height:28px;font-weight:600;color:var(--primary)}
-#method-interaction .mi-positive-metrics small{margin-left:4px;font-size:12px;font-weight:400;color:var(--secondary)}
-@media(max-width:1100px){#method-interaction .method-interaction-grid{grid-template-columns:1fr 1fr}#method-interaction .mi-positive-card{grid-column:1/-1}}
-@media(max-width:850px){#method-interaction .method-interaction-grid{grid-template-columns:1fr}#method-interaction .mi-positive-card{grid-column:auto}}
+@media(max-width:850px){#method-interaction .method-interaction-grid{grid-template-columns:1fr}}
 @media(max-width:500px){#method-interaction .mi-dashboard-head{flex-wrap:wrap}#method-interaction .mi-switch{width:100%}#method-interaction .mi-switch button{flex:1;white-space:nowrap}}
 `;

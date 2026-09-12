@@ -3,7 +3,7 @@ import {contentQualityStyles as styles} from './content-quality-styles.js';
 import {teachingContentVersion} from './content-quality-version.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function mountContentQuality(root){
- if(!root||teachingContentVersion==='baseline')return()=>{};
+ if(!root||teachingContentVersion==='baseline'||teachingContentVersion==='1.2')return()=>{};
  const goals=root.querySelector('#content-goals-title'),challenges=root.querySelector('#content-challenges-title');
  const oldGoals=goals?.textContent,oldChallenges=challenges?.textContent;
  if(goals)goals.textContent='教学目标';if(challenges)challenges.textContent='教学重难点';
