@@ -1,12 +1,29 @@
 const storageKey='teaching-evaluation-demo-report-versions';
+const advancedProfiles={universal:'通用',vocational:'高职院校',applied:'应用型院校',research:'研究型院校',comprehensive:'综合性大学'};
 const pages={
   '教学态度':'attitude','教学内容':'content','教学方法':'method','教学素养':'literacy','教学效果':'effect'
 };
 
 export function mountReportVersionConfig({dimensions,toast,onChange}){
-  let state={active:'advanced',versions:{advanced:{name:'进阶版',dimensions:[...dimensions],modules:{}},basic:{name:'普通版',dimensions:[...dimensions],modules:{}}}};
-  try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved?.versions?.advanced&&saved?.versions?.basic)state=saved;}catch{}
-  const get=()=>state.versions[state.active];
+  let state={active:'advanced',activeAdvancedProfile:'universal',versions:{advanced:{name:'进阶版',profiles:Object.fromEntries(Object.entries(advancedProfiles).map(([id,name])=>[id,{name,dimensions:[...dimensions],modules:{}}]))},basic:{name:'普通版',dimensions:[...dimensions],modules:{}}}};
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey));
+    if(saved?.versions?.advanced&&saved?.versions?.basic){
+      state=saved;
+      // Migrate the previous single advanced configuration without touching basic.
+      const advanced=state.versions.advanced;
+      if(!advanced.profiles){
+        const universal={name:'通用',dimensions:[...(advanced.dimensions||dimensions)],modules:{...(advanced.modules||{})}};
+        advanced.profiles=Object.fromEntries(Object.entries(advancedProfiles).map(([id,name])=>[id,id==='universal'?universal:{name,dimensions:[...universal.dimensions],modules:JSON.parse(JSON.stringify(universal.modules))}]));
+        delete advanced.dimensions; delete advanced.modules;
+      }else{
+        Object.entries(advancedProfiles).forEach(([id,name])=>{if(!advanced.profiles[id])advanced.profiles[id]={name,dimensions:[...dimensions],modules:{}};else advanced.profiles[id].name=name;});
+      }
+      state.activeAdvancedProfile=state.activeAdvancedProfile&&advanced.profiles[state.activeAdvancedProfile]?state.activeAdvancedProfile:'universal';
+    }
+  }catch{}
+  const getAdvancedProfile=()=>state.versions.advanced.profiles[state.activeAdvancedProfile||'universal'];
+  const get=()=>state.active==='advanced'?getAdvancedProfile():state.versions.basic;
   const moduleList=name=>{const root=document.querySelector('#'+pages[name]);return [...root.querySelectorAll(':scope > section.card.section, .content-detail-card[id]')].map(node=>({id:node.id||node.querySelector('h2,h3')?.id,name:node.querySelector('h2,h3')?.textContent.trim()||'分析模块'})).filter(m=>m.id);};
   const save=()=>localStorage.setItem(storageKey,JSON.stringify(state));
   let fullSummaryMarkup;
@@ -51,7 +68,8 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
   const render=()=>{
     const config=get();
     const ordered=[...config.dimensions,...dimensions.filter(name=>!config.dimensions.includes(name))];
-    panel.querySelector('.report-version-body').innerHTML=`<div class="report-version-tabs" role="tablist">${Object.entries(state.versions).map(([id,v])=>`<button type="button" role="tab" data-version="${id}" aria-selected="${state.active===id}">${v.name}</button>`).join('')}</div><p class="report-version-hint">选择本版本包含的维度和模块；排序会同步到报告导航和诊断地图。</p><div class="version-dimensions">${ordered.map((name,index)=>{const enabled=config.dimensions.includes(name),mods=moduleList(name),visible=config.modules[name]||mods.map(m=>m.id);return `<section class="version-dimension" data-version-dimension="${name}"><header><label><input type="checkbox" data-dimension-toggle="${name}" ${enabled?'checked':''}>${name}</label><span><button type="button" data-dimension-move="${index},-1" ${index===0||!enabled?'disabled':''}>↑</button><button type="button" data-dimension-move="${index},1" ${index===config.dimensions.length-1||!enabled?'disabled':''}>↓</button></span></header>${enabled?`<div class="version-modules">${mods.map((m,i)=>`<div><label><input type="checkbox" data-module-toggle="${name}|${m.id}" ${visible.includes(m.id)?'checked':''}>${m.name}</label><span><button type="button" data-module-move="${name}|${m.id}|-1" ${i===0?'disabled':''}>↑</button><button type="button" data-module-move="${name}|${m.id}|1" ${i===mods.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div>`:''}</section>`;}).join('')}</div>`;
+    const profileTabs=state.active==='advanced'?`<div class="report-advanced-profiles" role="tablist" aria-label="进阶版院校类型">${Object.entries(advancedProfiles).map(([id,name])=>`<button type="button" role="tab" data-advanced-profile="${id}" aria-selected="${state.activeAdvancedProfile===id}">${name}</button>`).join('')}</div>`:'';
+    panel.querySelector('.report-version-body').innerHTML=`<div class="report-version-tabs" role="tablist">${Object.entries(state.versions).map(([id,v])=>`<button type="button" role="tab" data-version="${id}" aria-selected="${state.active===id}">${v.name}</button>`).join('')}</div>${profileTabs}<p class="report-version-hint">选择本版本包含的维度和模块；排序会同步到报告导航和诊断地图。</p><div class="version-dimensions">${ordered.map((name,index)=>{const enabled=config.dimensions.includes(name),mods=moduleList(name),visible=config.modules[name]||mods.map(m=>m.id);return `<section class="version-dimension" data-version-dimension="${name}"><header><label><input type="checkbox" data-dimension-toggle="${name}" ${enabled?'checked':''}>${name}</label><span><button type="button" data-dimension-move="${index},-1" ${index===0||!enabled?'disabled':''}>↑</button><button type="button" data-dimension-move="${index},1" ${index===config.dimensions.length-1||!enabled?'disabled':''}>↓</button></span></header>${enabled?`<div class="version-modules">${mods.map((m,i)=>`<div><label><input type="checkbox" data-module-toggle="${name}|${m.id}" ${visible.includes(m.id)?'checked':''}>${m.name}</label><span><button type="button" data-module-move="${name}|${m.id}|-1" ${i===0?'disabled':''}>↑</button><button type="button" data-module-move="${name}|${m.id}|1" ${i===mods.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div>`:''}</section>`;}).join('')}</div>`;
   };
   const persistApply=(message)=>{save();apply();render();if(message)toast(message);};
   button.addEventListener('click',()=>{render();panel.hidden=false;});
@@ -60,6 +78,7 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
     if(target.matches('[data-version-close]')){panel.hidden=true;return;}
     if(target.matches('[data-version-save]')){persistApply('当前版本配置已保存');return;}
     if(target.dataset.version){state.active=target.dataset.version;apply();render();return;}
+    if(target.dataset.advancedProfile){state.activeAdvancedProfile=target.dataset.advancedProfile;apply();render();return;}
     if(target.dataset.dimensionToggle){const name=target.dataset.dimensionToggle,config=get();config.dimensions=target.checked?[...config.dimensions,name]:config.dimensions.filter(n=>n!==name);config.modules[name]??=moduleList(name).map(m=>m.id);apply();render();return;}
     if(target.dataset.moduleToggle){const [name,id]=target.dataset.moduleToggle.split('|'),config=get();config.modules[name]??=moduleList(name).map(m=>m.id);config.modules[name]=target.checked?[...new Set([...config.modules[name],id])]:config.modules[name].filter(x=>x!==id);apply();return;}
     if(target.dataset.dimensionMove){const [index,delta]=target.dataset.dimensionMove.split(',').map(Number),config=get();const current=[...config.dimensions],next=index+delta;if(next>=0&&next<current.length){[current[index],current[next]]=[current[next],current[index]];config.dimensions=current;apply();render();}return;}
