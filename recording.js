@@ -1,4 +1,5 @@
 import {mountRecordingProcess} from './recording-process.js';
+import {mountRecordingSmartGuide} from './recording-smart-guide.js';
 import {mountRealRecording} from './recording-real.js';
 import {recordingRealVersion} from './recording-real-version.js';
 import {recordingData as data, recordingScore, transcriptIndex, recordingTime as time} from './recording-data.js';
@@ -135,5 +136,6 @@ export function initRecording({openDialog,toast}) {
   new MutationObserver(()=>{if(root.hidden)pause();}).observe(root,{attributes:true,attributeFilter:['hidden']});
   renderTranscript();updateScore();updateTime();
   mountRecordingProcess();
+  mountRecordingSmartGuide(root);
   mountRealRecording(root, {toast});
 }

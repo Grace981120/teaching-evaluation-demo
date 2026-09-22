@@ -14,11 +14,11 @@ python3 server.py
 
 ## 公网部署与访问保护
 
-公网地址：https://majestic-zuccutto-d8f0af.netlify.app 。Netlify 上通过 `netlify/edge-functions/access.js` 验证访问密码，报告页面及静态资源都受保护。登录会话有效期为 12 小时，使用签名的 HttpOnly、Secure Cookie；密码或签名密钥变更后旧会话失效。未设置服务端配置时拒绝访问。
+公网地址：https://teaching-evaluation-demo.netlify.app 。当前 Demo 不设访问密码，可直接打开查看。
 
 服务端环境变量为 `DEMO_PASSWORD_SALT`、`DEMO_PASSWORD_HASH`（SHA-256 的 `salt:password` 十六进制摘要）和 `DEMO_SESSION_SECRET`（随机 32 字节以上密钥）。不要把密码、会话密钥或环境文件提交到仓库。
 
-部署使用 `netlify deploy --prod`，配置文件会运行 `python3 scripts/build-site.py` 并打包访问保护函数。不要再仅通过 Drop 上传静态目录，否则不会包含访问保护。`dist/` 只包含对外发布的页面与资源，不包含源配置及辅助脚本。验证密码保护逻辑：`node scripts/test-access.mjs`。本机 `server.py` 保持用于开发预览，不启用线上密码验证。
+部署使用 `netlify deploy --prod`，配置文件会运行 `python3 scripts/build-site.py`。`dist/` 只包含对外发布的页面与资源，不包含源配置及辅助脚本。本机 `server.py` 保持用于开发预览。
 
 ## 已实现
 

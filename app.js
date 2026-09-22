@@ -12,6 +12,7 @@ import {initAttitude} from './attitude.js';
 import {mountOverviewOutline} from './overview-outline.js';
 import {mountOverviewIteration} from './overview-iteration.js?v=20260912-sync2';
 import {mountAgentIteration} from './agent-iteration.js?v=20260912-sync2';
+import {mountReportVersionConfig} from './report-version-config.js';
 
 const dimensions = [
   {name:'教学态度',score:attitudeData.score,weight:25,description:'教学投入较高，考勤与课堂行为线索待核查。',insight:attitudeData.summary,metrics:attitudeData.sections.map(s=>[s.name,s.observation,s.status])},
@@ -44,19 +45,26 @@ let expandedEvidence = false;
 let activeDimension = 0;
 let shownSeries = [true,true,true];
 let toastTimer;
+const visibleDimensions = () => {
+  const config = window.__reportVersionConfig;
+  return config ? dimensions.filter(d=>config.dimensions.includes(d.name)) : dimensions;
+};
 function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('show'),2800); }
 function persist() { try { localStorage.setItem(storageKey, JSON.stringify({plans,completed,notes})); return true; } catch { toast('浏览器暂不支持保存，当前操作仅在本次访问中保留'); return false; } }
 function renderDimensions() {
-  $('#dimensions').innerHTML = dimensions.map((d,i) => `<button class="dimension-card" data-dimension="${i}" aria-label="${d.name} ${d.score}分，查看评价依据"><span class="card-arrow" aria-hidden="true">↗</span><h3>${d.name}</h3><span class="tag ${i===2?'orange':''}">${i===2?'可提升':'优秀'}</span><strong class="dimension-score">${d.score.toFixed(1)}</strong><p>${d.description}</p></button>`).join('');
+  $('#dimensions').innerHTML = dimensions.map((d,i)=>({d,i})).filter(({d})=>visibleDimensions().includes(d)).map(({d,i}) => `<button class="dimension-card" data-dimension="${i}" aria-label="${d.name} ${d.score}分，查看评价依据"><span class="card-arrow" aria-hidden="true">↗</span><h3>${d.name}</h3><span class="tag ${i===2?'orange':''}">${i===2?'可提升':'优秀'}</span><strong class="dimension-score">${d.score.toFixed(1)}</strong><p>${d.description}</p></button>`).join('');
 }
 function renderRadar() {
+  const activeDimensions=visibleDimensions();
+  if(activeDimensions.length<3){$('#radar').innerHTML='<p class="version-radar-empty">至少启用 3 个维度后显示雷达图</p>';return;}
   const center = [175,135], radius = 96;
-  const point = (i,amount) => [center[0] + Math.sin(i*Math.PI*2/5)*radius*amount,center[1]-Math.cos(i*Math.PI*2/5)*radius*amount];
+  const point = (i,amount) => [center[0] + Math.sin(i*Math.PI*2/activeDimensions.length)*radius*amount,center[1]-Math.cos(i*Math.PI*2/activeDimensions.length)*radius*amount];
   const polygon = values => values.map((v,i) => point(i,v/100).map(n=>n.toFixed(2)).join(',')).join(' ');
-  const values = [dimensions.map(d=>d.score),[88.4,90.6,84.5,88.2,87.8],[86.2,88.1,80.6,85.4,86.3]];
+  const indices=activeDimensions.map(d=>dimensions.indexOf(d));
+  const values = [activeDimensions.map(d=>d.score),[88.4,90.6,84.5,88.2,87.8].filter((_,i)=>indices.includes(i)),[86.2,88.1,80.6,85.4,86.3].filter((_,i)=>indices.includes(i))];
   const colors = ['#1d70f2','#b4bac0','#e545d2'];
-  const labels = [[175,21,'middle'],[286,99,'start'],[251,237,'middle'],[99,237,'middle'],[64,99,'end']];
-  $('#radar').innerHTML = `<svg viewBox="0 0 350 270" role="img" aria-labelledby="radar-title"><title id="radar-title">五维评价对比：${values.map((series,i)=> shownSeries[i] ? ['本课节','本课程','全校课程'][i]+' '+series.map((v,j)=>dimensions[j].name+v+'分').join('，') : '').filter(Boolean).join('；')}</title>${[.14286,.35714,.57143,.78571,1].map(r=>`<circle cx="175" cy="135" r="${radius*r}" fill="none" stroke="#e9ecf0" stroke-width="1"/>`).join('')}${dimensions.map((d,i)=>`<line x1="175" y1="135" x2="${point(i,1)[0]}" y2="${point(i,1)[1]}" stroke="#e9ecf0"/>`).join('')}${[1,2,0].map(i=>shownSeries[i]?`<polygon points="${polygon(values[i])}" fill="${colors[i]}" fill-opacity="${i===0?.12:.04}" stroke="${colors[i]}" stroke-width="${i===0?2:1.5}" ${i?'stroke-dasharray="3 3"':''}/>`:'').join('')}${shownSeries[0]?values[0].map((v,i)=>`<circle cx="${point(i,v/100)[0]}" cy="${point(i,v/100)[1]}" r="2.6" fill="#1d70f2" stroke="white" stroke-width="1"/>`).join(''):''}${labels.map(([x,y,anchor],i)=>`<g class="axis-label" data-dimension="${i}"><text x="${x}" y="${y}" text-anchor="${anchor}">${dimensions[i].name}</text><text class="value" x="${x}" y="${y+16}" text-anchor="${anchor}">${dimensions[i].score}</text></g>`).join('')}</svg>`;
+  const labels=activeDimensions.map((d,i)=>{const [x,y]=point(i,1.22);return [x,y,x<145?'end':x>205?'start':'middle'];});
+  $('#radar').innerHTML = `<svg viewBox="0 0 350 270" role="img" aria-labelledby="radar-title"><title id="radar-title">评价维度对比</title>${[.14286,.35714,.57143,.78571,1].map(r=>`<circle cx="175" cy="135" r="${radius*r}" fill="none" stroke="#e9ecf0" stroke-width="1"/>`).join('')}${activeDimensions.map((d,i)=>`<line x1="175" y1="135" x2="${point(i,1)[0]}" y2="${point(i,1)[1]}" stroke="#e9ecf0"/>`).join('')}${[1,2,0].map(i=>shownSeries[i]?`<polygon points="${polygon(values[i])}" fill="${colors[i]}" fill-opacity="${i===0?.12:.04}" stroke="${colors[i]}" stroke-width="${i===0?2:1.5}" ${i?'stroke-dasharray="3 3"':''}/>`:'').join('')}${shownSeries[0]?values[0].map((v,i)=>`<circle cx="${point(i,v/100)[0]}" cy="${point(i,v/100)[1]}" r="2.6" fill="#1d70f2" stroke="white" stroke-width="1"/>`).join(''):''}${labels.map(([x,y,anchor],i)=>`<g class="axis-label" data-dimension="${indices[i]}"><text x="${x}" y="${y}" text-anchor="${anchor}">${activeDimensions[i].name}</text><text class="value" x="${x}" y="${y+16}" text-anchor="${anchor}">${activeDimensions[i].score}</text></g>`).join('')}</svg>`;
 }
 function renderEvidence() {
   $('#evidence-tabs').innerHTML = evidence.map((e,i)=>`<button role="tab" id="evidence-tab-${i}" aria-controls="evidence-panel" aria-selected="${activeEvidence===i}" tabindex="${activeEvidence===i?0:-1}" data-evidence="${i}">${e.question}<span>${e.refs.length} 个证据</span></button>`).join('');
@@ -79,6 +87,7 @@ function openDialog(title,body,eyebrow='评价详情') {
   $('#dialog-body').innerHTML = body;
   if (!$('#detail-dialog').open) $('#detail-dialog').showModal();
 }
+function configuredSections(prefix,sections) { return sections.filter(section=>document.getElementById(`${prefix}-${section.id}`)?.hidden!==true); }
 function dimensionDialog(index) {
   activeDimension = index;
   const d = dimensions[index];
@@ -192,4 +201,4 @@ function renderRoute(scroll=false) {
 }
 window.addEventListener('hashchange',()=>renderRoute(true));
 window.addEventListener('popstate',()=>renderRoute(true));
-renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();mountOverviewOutline({openDialog});initAttitude({openDialog});initContent({openDialog});initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});mountOverviewIteration({openDialog});mountAgentIteration();renderRoute(/^#literacy-/.test(location.hash));
+renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();mountOverviewOutline({openDialog});initAttitude({openDialog});initContent({openDialog});initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});mountOverviewIteration({openDialog});mountAgentIteration();mountReportVersionConfig({dimensions:dimensions.map(d=>d.name),toast,onChange:()=>{renderDimensions();renderRadar();}});renderRoute(/^#literacy-/.test(location.hash));
