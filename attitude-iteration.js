@@ -1,8 +1,12 @@
 import {attitudeIterationVersion} from './attitude-iteration-version.js';
 import {methodData} from './method-data.js';
 import {mountTeachingLanguage} from './method-language.js';
+import {mountAttitudeIterationV11} from './attitude-iteration-v11.js';
+import {mountAttitudeIterationV12} from './attitude-iteration-v12.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function mountAttitudeIteration(root,{openDialog}){
+ if(attitudeIterationVersion==='1.2')return mountAttitudeIterationV12(root,{openDialog});
+ if(attitudeIterationVersion==='1.1')return mountAttitudeIterationV11(root,{openDialog});
  if(attitudeIterationVersion==='baseline'||root.dataset.attitudeIteration)return;
  // If the independently versioned emotion module is disabled, retain the prior dimension.
  if(!root.querySelector('#attitude-emotion')?.shadowRoot)return;

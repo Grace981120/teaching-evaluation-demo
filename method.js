@@ -3,6 +3,7 @@ import {mountTeachingQuestions} from './method-questions.js?v=20260912-5';
 import {mountTeachingLanguage} from './method-language.js';
 import {mountTeachingBoard} from './method-board.js';
 import {mountTeachingMultimedia} from './method-multimedia.js';
+import {mountDimensionSummary} from './dimension-summary.js?v=20261019-jump5';
 import {methodData as data,methodColors,methodTime,methodDuration,rowDuration} from './method-data.js';
 import {donutSegmentAttributes} from './attitude.js';
 const asset=name=>`assets/figma/method-${name}.svg`;
@@ -65,4 +66,5 @@ export function initMethod({openDialog}){
   const section=root.querySelector('#method-'+id);if(section)root.append(section);
  });
  root.querySelector('footer')&&root.append(root.querySelector('footer'));
+ mountDimensionSummary(root,'method',{openDialog});
 }

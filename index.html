@@ -15,17 +15,19 @@
   <link rel="stylesheet" href="literacy.css" />
   <link rel="stylesheet" href="chart-interactions.css" />
   <link rel="stylesheet" href="recording.css" />
+  <link rel="stylesheet" href="recording-anomaly.css" />
   <link rel="stylesheet" href="overview-outline.css" />
   <link rel="stylesheet" href="overview-iteration.css" />
   <link rel="stylesheet" href="agent-iteration.css?v=20260912-2" />
+  <link rel="stylesheet" href="scale-evaluation-v8.css?v=20261019" />
   <link rel="stylesheet" href="report-version-config.css" />
   <link rel="stylesheet" href="report-version-tweaks.css" />
-  <script type="module" src="app.js?v=20260912-13"></script>
+  <script type="module" src="app.js?v=20261019-title-cleanup"></script>
 </head>
 <body>
   <header class="topbar">
     <nav aria-label="报告导航">
-      <a href="#recording">课程实录</a>
+      <a href="#recording">课堂实录</a>
       <a href="#overview" class="active" aria-current="page">报告总览</a>
       <a href="#attitude">教学态度</a><a href="#content">教学内容</a>
       <a href="#method">教学方法</a><a href="#literacy">教学素养</a><a href="#effect">教学效果</a>
@@ -72,7 +74,7 @@
     </section>
     <footer><span><span class="status-dot"></span>DEMO · 示例数据，仅用于交互演示</span><button class="text-button muted" data-action="export">导出报告 <span>↓</span></button></footer>
   </main>
-  <main id="recording" hidden aria-label="课程实录"></main>
+  <main id="recording" hidden aria-label="课堂实录"></main>
   <main id="attitude" hidden aria-label="教学态度分析"></main>
   <main id="effect" hidden aria-label="教学效果分析"></main>
   <main id="method" hidden aria-label="教学方法分析"></main>

@@ -1,4 +1,5 @@
 import {literacyData as data} from './literacy-data.js';
+import {mountDimensionSummary} from './dimension-summary.js?v=20261019-jump5';
 
 const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset = name => `assets/figma/literacy-${name}.svg`;
@@ -16,6 +17,7 @@ export function initLiteracy({openDialog}) {
       </article>`).join('')}</div>
     </section>
     <footer><span><span class="status-dot"></span>DEMO · 本页为人工智能课程素养示例</span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
+  mountDimensionSummary(root,'literacy',{openDialog});
   root.addEventListener('click',event=>{
     const button=event.target.closest('[data-literacy-example]');
     if(!button) return;

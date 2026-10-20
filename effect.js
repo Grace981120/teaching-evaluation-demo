@@ -3,6 +3,7 @@ import {effectData as data,effectColors,effectTime,effectDuration,rowDuration} f
 import {effectTraces} from './effect-chart-assets.js';
 import {donutSegmentAttributes} from './attitude.js';
 import {mountEffectIteration} from './effect-iteration.js';
+import {mountDimensionSummary} from './dimension-summary.js?v=20261019-jump5';
 const asset=n=>`assets/figma/effect-${n}.svg`;
 const note='<div class="dialog-note">DEMO · 本页为设计稿中的独立课堂示例，与总览课程人数不同。曲线及统计用于交互演示，尚未接入视频或统一分析数据。</div>';
 function gauge(i){const g=data.gauges[i];return `<button class="effect-gauge" data-effect-gauge="${i}" aria-label="${g.name} ${g.value}%，查看详情"><span class="effect-gauge-plot"><img src="${asset('participation-imgEllipse1165')}" width="119.76" height="60" style="left:.12px;top:0" alt=""><img src="${asset(g.asset)}" width="${g.w}" height="${g.h}" style="left:${g.x}px;top:${g.y}px" alt=""><strong>${g.value}<small>%</small></strong><span>${g.name}</span></span></button>`;}
@@ -34,4 +35,5 @@ root.querySelectorAll('.effect-chart').forEach(wrap=>bindChartHover({
   inspect:minute=>updateChart(wrap,minute),clear:()=>wrap.querySelector('.effect-crosshair').setAttribute('visibility','hidden')
 }));
 mountEffectIteration(root,{openDialog});
+mountDimensionSummary(root,'effect',{openDialog});
 }

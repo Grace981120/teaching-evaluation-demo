@@ -38,7 +38,7 @@ export function mountRecordingSmartGuide(root){
   const evaluation=tabs?.querySelector('[data-rec-tab="evaluation"]');
   if(!tabs||!sidebar||!evaluation)return;
   root.classList.add('recording-smart-guide-enabled');
-  sidebar.setAttribute('aria-label','课程实录量表、智能导读、语音转写与PPT');
+  sidebar.setAttribute('aria-label','课堂实录量表、智能导读、语音转写与PPT');
   const link=document.createElement('link');link.rel='stylesheet';link.href='./recording-smart-guide.css';document.head.append(link);
   const tab=document.createElement('button');
   tab.type='button';tab.id='recording-smart-guide-tab';tab.dataset.smartGuideTab='guide';tab.setAttribute('role','tab');tab.setAttribute('aria-controls','recording-smart-guide');tab.setAttribute('aria-selected','false');tab.tabIndex=-1;tab.textContent='智能导读';evaluation.after(tab);

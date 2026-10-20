@@ -24,12 +24,24 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
   }catch{}
   const getAdvancedProfile=()=>state.versions.advanced.profiles[state.activeAdvancedProfile||'universal'];
   const get=()=>state.active==='advanced'?getAdvancedProfile():state.versions.basic;
-  const moduleList=name=>{const root=document.querySelector('#'+pages[name]);return [...root.querySelectorAll(':scope > section.card.section, .content-detail-card[id]')].map(node=>({id:node.id||node.querySelector('h2,h3')?.id,name:node.querySelector('h2,h3')?.textContent.trim()||'分析模块'})).filter(m=>m.id);};
+  const moduleList=name=>{const root=document.querySelector('#'+pages[name]);return [...root.querySelectorAll(':scope > section.card.section, :scope > section#attitude-emotion, .content-detail-card[id]')].map(node=>({id:node.id||node.querySelector('h2,h3')?.id,name:node.id==='attitude-emotion'?'教师情感':node.id==='attitude-basics'?'基础情况':node.querySelector('h2,h3')?.textContent.trim()||'分析模块'})).filter(m=>m.id&&!(name==='教学态度'&&root.dataset.attitudeIteration==='1.1'&&['attitude-body','attitude-investment'].includes(m.id)));};
+  const defaultModules=name=>moduleList(name).map(module=>module.id).filter(id=>name!=='教学态度'||!['attitude-emotion','attitude-patrol'].includes(id));
+  if(state.attitudeSplitVersion!==1&&document.querySelector('#attitude')?.dataset.attitudeIteration==='1.1'){
+    const migrate=config=>{const prior=config.modules['教学态度'];if(prior){const wanted=new Set(prior.filter(id=>!['attitude-investment','attitude-body'].includes(id)).concat(prior.includes('attitude-body')?['attitude-posture']:[],['attitude-anomaly']));config.modules['教学态度']=moduleList('教学态度').map(module=>module.id).filter(id=>wanted.has(id));}else config.modules['教学态度']=defaultModules('教学态度');};
+    migrate(state.versions.basic);Object.values(state.versions.advanced.profiles).forEach(migrate);
+    state.attitudeSplitVersion=1;
+  }
+  if(state.attitudeExpansionVersion!==1&&document.querySelector('#attitude')?.dataset.attitudeExpansion==='1.2'){
+    const additions=['attitude-attendance','attitude-attire','attitude-sensitive'];
+    const migrate=config=>{const wanted=new Set([...(config.modules['教学态度']||defaultModules('教学态度')),...additions]);config.modules['教学态度']=moduleList('教学态度').map(module=>module.id).filter(id=>wanted.has(id));};
+    migrate(state.versions.basic);Object.values(state.versions.advanced.profiles).forEach(migrate);
+    state.attitudeExpansionVersion=1;
+  }
   const save=()=>localStorage.setItem(storageKey,JSON.stringify(state));
   let fullSummaryMarkup;
   let tagsExpanded=false;
   const apply=()=>{
-    const config=get(); window.__reportVersionConfig={dimensions:config.dimensions};
+    const config=get(); window.__reportVersionConfig={dimensions:config.dimensions,modules:config.modules};
     const isBasic=state.active==='basic';
     document.querySelectorAll('#overview .overview-v2-highlight,#overview .overview-v2-problem,#overview .overview-v2-outline,#overview-v2-highlights,#overview-v2-problems').forEach(node=>node.hidden=isBasic);
     const summary=document.querySelector('#overview .summary-grid');
@@ -44,13 +56,16 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
       document.querySelector(`.topbar a[href="#${page}"]`)?.toggleAttribute('hidden',!visible);
       const root=document.querySelector('#'+page);
       if(!visible&&location.hash.startsWith('#'+page))location.hash='#overview';
-      const selected=config.modules[name];
+      const selected=config.modules[name]||defaultModules(name);
       moduleList(name).forEach(module=>{
         const node=document.getElementById(module.id);
         if(!node)return;
         if(name==='教学效果'&&['effect-participation-legacy','effect-expressions-legacy'].includes(module.id)){node.hidden=true;return;}
-        node.hidden=visible&&selected?.includes(module.id)===false;
+        node.hidden=!visible||!selected.includes(module.id);
       });
+      if(name==='教学态度'&&root.dataset.attitudeIteration==='1.1'){
+        root.querySelector('#attitude-body').hidden=true;
+      }
       if(name==='教学效果'){
         const state=document.querySelector('#effect-state');
         const legacyParticipation=document.querySelector('#effect-participation-legacy');
@@ -69,7 +84,7 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
     const config=get();
     const ordered=[...config.dimensions,...dimensions.filter(name=>!config.dimensions.includes(name))];
     const profileTabs=state.active==='advanced'?`<div class="report-advanced-profiles" role="tablist" aria-label="进阶版院校类型">${Object.entries(advancedProfiles).map(([id,name])=>`<button type="button" role="tab" data-advanced-profile="${id}" aria-selected="${state.activeAdvancedProfile===id}">${name}</button>`).join('')}</div>`:'';
-    panel.querySelector('.report-version-body').innerHTML=`<div class="report-version-tabs" role="tablist">${Object.entries(state.versions).map(([id,v])=>`<button type="button" role="tab" data-version="${id}" aria-selected="${state.active===id}">${v.name}</button>`).join('')}</div>${profileTabs}<p class="report-version-hint">选择本版本包含的维度和模块；排序会同步到报告导航和诊断地图。</p><div class="version-dimensions">${ordered.map((name,index)=>{const enabled=config.dimensions.includes(name),mods=moduleList(name),visible=config.modules[name]||mods.map(m=>m.id);return `<section class="version-dimension" data-version-dimension="${name}"><header><label><input type="checkbox" data-dimension-toggle="${name}" ${enabled?'checked':''}>${name}</label><span><button type="button" data-dimension-move="${index},-1" ${index===0||!enabled?'disabled':''}>↑</button><button type="button" data-dimension-move="${index},1" ${index===config.dimensions.length-1||!enabled?'disabled':''}>↓</button></span></header>${enabled?`<div class="version-modules">${mods.map((m,i)=>`<div><label><input type="checkbox" data-module-toggle="${name}|${m.id}" ${visible.includes(m.id)?'checked':''}>${m.name}</label><span><button type="button" data-module-move="${name}|${m.id}|-1" ${i===0?'disabled':''}>↑</button><button type="button" data-module-move="${name}|${m.id}|1" ${i===mods.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div>`:''}</section>`;}).join('')}</div>`;
+    panel.querySelector('.report-version-body').innerHTML=`<div class="report-version-tabs" role="tablist">${Object.entries(state.versions).map(([id,v])=>`<button type="button" role="tab" data-version="${id}" aria-selected="${state.active===id}">${v.name}</button>`).join('')}</div>${profileTabs}<p class="report-version-hint">选择本版本包含的维度和模块；排序会同步到报告导航和诊断地图。</p><div class="version-dimensions">${ordered.map((name,index)=>{const enabled=config.dimensions.includes(name),mods=moduleList(name),visible=config.modules[name]||defaultModules(name);return `<section class="version-dimension" data-version-dimension="${name}"><header><label><input type="checkbox" data-dimension-toggle="${name}" ${enabled?'checked':''}>${name}</label><span><button type="button" data-dimension-move="${index},-1" ${index===0||!enabled?'disabled':''}>↑</button><button type="button" data-dimension-move="${index},1" ${index===config.dimensions.length-1||!enabled?'disabled':''}>↓</button></span></header>${enabled?`<div class="version-modules">${mods.map((m,i)=>`<div><label><input type="checkbox" data-module-toggle="${name}|${m.id}" ${visible.includes(m.id)?'checked':''}>${m.name}</label><span><button type="button" data-module-move="${name}|${m.id}|-1" ${i===0?'disabled':''}>↑</button><button type="button" data-module-move="${name}|${m.id}|1" ${i===mods.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div>`:''}</section>`;}).join('')}</div>`;
   };
   const persistApply=(message)=>{save();apply();render();if(message)toast(message);};
   button.addEventListener('click',()=>{render();panel.hidden=false;});
@@ -79,10 +94,10 @@ export function mountReportVersionConfig({dimensions,toast,onChange}){
     if(target.matches('[data-version-save]')){persistApply('当前版本配置已保存');return;}
     if(target.dataset.version){state.active=target.dataset.version;apply();render();return;}
     if(target.dataset.advancedProfile){state.activeAdvancedProfile=target.dataset.advancedProfile;apply();render();return;}
-    if(target.dataset.dimensionToggle){const name=target.dataset.dimensionToggle,config=get();config.dimensions=target.checked?[...config.dimensions,name]:config.dimensions.filter(n=>n!==name);config.modules[name]??=moduleList(name).map(m=>m.id);apply();render();return;}
-    if(target.dataset.moduleToggle){const [name,id]=target.dataset.moduleToggle.split('|'),config=get();config.modules[name]??=moduleList(name).map(m=>m.id);config.modules[name]=target.checked?[...new Set([...config.modules[name],id])]:config.modules[name].filter(x=>x!==id);apply();return;}
+    if(target.dataset.dimensionToggle){const name=target.dataset.dimensionToggle,config=get();config.dimensions=target.checked?[...config.dimensions,name]:config.dimensions.filter(n=>n!==name);config.modules[name]??=defaultModules(name);apply();render();return;}
+    if(target.dataset.moduleToggle){const [name,id]=target.dataset.moduleToggle.split('|'),config=get();config.modules[name]??=defaultModules(name);config.modules[name]=target.checked?[...new Set([...config.modules[name],id])]:config.modules[name].filter(x=>x!==id);apply();return;}
     if(target.dataset.dimensionMove){const [index,delta]=target.dataset.dimensionMove.split(',').map(Number),config=get();const current=[...config.dimensions],next=index+delta;if(next>=0&&next<current.length){[current[index],current[next]]=[current[next],current[index]];config.dimensions=current;apply();render();}return;}
-    if(target.dataset.moduleMove){const [name,id,delta]=target.dataset.moduleMove.split('|'),config=get();const list=config.modules[name]??moduleList(name).map(m=>m.id),index=list.indexOf(id),next=index+Number(delta);if(next>=0&&next<list.length){[list[index],list[next]]=[list[next],list[index]];config.modules[name]=list;const root=document.querySelector('#'+pages[name]),node=document.getElementById(id),reference=document.getElementById(list[next]);if(node&&reference)root.insertBefore(node,delta==='-1'?reference:reference.nextSibling);apply();render();}return;}
+    if(target.dataset.moduleMove){const [name,id,delta]=target.dataset.moduleMove.split('|'),config=get();const list=config.modules[name]??defaultModules(name),index=list.indexOf(id),next=index+Number(delta);if(next>=0&&next<list.length){[list[index],list[next]]=[list[next],list[index]];config.modules[name]=list;const root=document.querySelector('#'+pages[name]),node=document.getElementById(id),reference=document.getElementById(list[next]);if(node&&reference)root.insertBefore(node,delta==='-1'?reference:reference.nextSibling);apply();render();}return;}
   });
   document.addEventListener('click',event=>{const tag=event.target.closest('[data-basic-tag-target]');if(!tag)return;location.hash=tag.dataset.basicTagTarget.replace('#','');document.querySelector(tag.dataset.basicTagTarget)?.scrollIntoView({behavior:'smooth',block:'start'});});
   document.addEventListener('click',event=>{if(event.target.closest('[data-basic-tags-expand]')){tagsExpanded=!tagsExpanded;apply();}});

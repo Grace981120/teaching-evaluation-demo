@@ -2,6 +2,7 @@ import {contentData as data} from './content-data.js';
 import {teachingContentVersion} from './content-quality-version.js';
 import {mountTeachingGoals} from './content-goals.js';
 import {mountContentAccuracy} from './content-accuracy.js';
+import {mountDimensionSummary} from './dimension-summary.js?v=20261019-jump5';
 
 const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset = name => `assets/figma/content-${name}.svg`;
@@ -34,6 +35,7 @@ export function initContent({openDialog}) {
     <footer><span></span><a class="text-button muted" href="#overview">返回报告总览 ↑</a></footer>`;
   mountTeachingGoals(root);
   mountContentAccuracy(root);
+  mountDimensionSummary(root,'content',{openDialog});
   root.addEventListener('click',event=>{
     const button=event.target.closest('[data-content-node],[data-content-all],[data-content-example]');
     if(!button) return;

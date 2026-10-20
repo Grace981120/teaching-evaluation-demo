@@ -44,6 +44,7 @@ body.agent-open{padding-right:400px}body.agent-open>.topbar nav{gap:22px}body.ag
 #agent-panel .skill-picker{position:absolute;bottom:174px;left:24px;right:24px;max-height:min(440px,55vh);background:#fff;border:1px solid #bfd6ff;border-radius:12px;box-shadow:0 8px 28px #2432471a;z-index:30;display:flex;flex-direction:column;padding:14px}#agent-panel .skill-picker header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}#agent-panel .skill-picker strong{font-size:14px;font-weight:500}#agent-panel .skill-picker header button{font-size:22px;line-height:24px;color:#7f848a}#agent-panel .picker-list{overflow:auto;display:flex;flex-direction:column;gap:8px}#agent-panel .picker-list button{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:8px 12px;border:1px solid #e9ecf0;border-radius:4px;font-size:14px;flex-shrink:0}#agent-panel .picker-list button:hover,#agent-panel .picker-list button[aria-pressed=true]{border-color:#1d70f2;color:#1d70f2}
 body.agent-open .agent-citable>.agent-cite{background:#1d70f2!important;color:#fff!important;opacity:0}body.agent-open .agent-citable:hover>.agent-cite,body.agent-open .agent-citable>.agent-cite:focus-visible{opacity:1;pointer-events:auto}body.agent-open .agent-citable>.agent-cite:hover{background:#155bd0!important;color:#fff!important}body.agent-open .agent-citable.agent-referenced>.agent-cite{background:#dceaff!important;color:#155bd0!important;opacity:1;pointer-events:auto}body.agent-open .agent-citable.agent-referenced>.agent-cite:hover{background:#155bd0!important;color:#fff!important}body.agent-open .agent-citable.agent-referenced>.agent-cite img{filter:none}body.agent-open .agent-citable>.agent-cite:hover img{filter:brightness(0) invert(1)}
 @media(hover:none){body.agent-open .agent-citable>.agent-cite{opacity:1}}@media(max-width:800px){#agent-panel .skill-picker{left:16px;right:16px}}
+#agent-panel .agent-head:has(.agent-return-scale:not([hidden])) .agent-close{margin-left:0}#agent-panel .agent-return-scale{margin-left:auto;height:30px;padding:4px 10px;border:1px solid #bcd3f5;background:#ffffffb8;color:#2563c9;border-radius:6px;font-size:12px;line-height:20px}#agent-panel .agent-return-scale:hover{background:#fff;border-color:#1d70f2}#agent-panel .agent-return-scale[hidden]{display:none}
 
 /* Module citation states: quiet module hover, clear button hover, more breathing room. */
 body.agent-open .agent-citable:hover{background-color:#f8fbff!important}
@@ -52,3 +53,12 @@ body.agent-open .agent-citable>.agent-cite:hover,
 body.agent-open .agent-citable.agent-referenced>.agent-cite:hover{background:#155bd0!important;color:#fff!important}
 body.agent-open .agent-citable>.agent-cite:hover img,
 body.agent-open .agent-citable.agent-referenced>.agent-cite:hover img{filter:brightness(0) invert(1)!important}
+body.scale-agent-coexist #agent-panel{z-index:27}
+#agent-panel .agent-scale-context{flex:none;margin:0 16px 8px;padding:10px 12px;background:#ffffffb8;border:1px solid #dce8fb;border-radius:10px;color:#243247}
+#agent-panel .agent-scale-context[hidden]{display:none}
+#agent-panel .agent-scale-context span{display:block;color:#2563c9;font-size:11px;line-height:18px}
+#agent-panel .agent-scale-context strong{display:block;font-size:13px;line-height:20px;font-weight:600}
+#agent-panel .agent-scale-context p{margin:3px 0 0;font-size:12px;line-height:19px;color:#536176;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+body.agent-open:not(.scale-agent-coexist) .scale-v8-entry{right:424px}
+#agent-panel .agent-return-scale{width:32px;height:32px;padding:0;border:0;background:transparent;color:#536176;border-radius:4px;font-size:26px;line-height:28px}
+#agent-panel .agent-return-scale:hover{background:#ffffff80;border-color:transparent}

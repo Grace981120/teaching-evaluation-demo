@@ -1,8 +1,10 @@
 import {bindChartHover} from './chart-interactions.js';
 import {mountAttitudeIteration} from './attitude-iteration.js';
 import {mountTeachingPose} from './attitude-pose.js';
+import {attitudeIterationVersion} from './attitude-iteration-version.js';
 import {mountTeacherEmotion} from './attitude-emotion.js';
 import {mountClassroomManagement} from './attitude-management.js';
+import {mountAttitudeSummary} from './attitude-summary.js?v=20261019-jump4';
 import {bodyTraceSVG} from './figma-chart-assets.js';
 import {attitudeData as data, formatTime, formatDuration} from './attitude-data.js';
 
@@ -62,7 +64,7 @@ export function initAttitude({openDialog}) {
   mountClassroomManagement(root);
   function basicDialog(i) {
     const b = data.basics[i];
-    openDialog(b.label,`<div class="basic-dialog-value"><strong>${b.value}${b.unit?`<small>${b.unit}</small>`:''}</strong><span class="tag ${b.status==='待核查'?'orange':''}">${b.status}</span></div>${b.events?`<div class="attitude-record-list">${b.events.map(([time,text])=>`<article><time>${time}</time><p>${text}</p></article>`).join('')}</div>`:`<div class="attitude-record-list"><article><time>${b.time}</time><p>${b.detail}</p></article></div>`}<div class="dialog-note">本页为交互演示，记录、时间点与分析结果均为示例；待核查线索应结合完整课堂情境确认。</div><div class="dialog-actions"><button class="primary-button" data-action="close">知道了</button></div>`,'教学态度 / 基础情况');
+    openDialog(b.label,`<div class="basic-dialog-value"><strong>${b.value}${b.unit?`<small>${b.unit}</small>`:''}</strong><span class="tag ${b.status==='待核查'?'orange':''}">${b.status}</span></div>${b.events?`<div class="attitude-record-list">${b.events.map(([time,text])=>`<article><time>${time}</time><p>${text}</p></article>`).join('')}</div>`:`<div class="attitude-record-list"><article><time>${b.time}</time><p>${b.detail}</p></article></div>`}<div class="dialog-note">本页为交互演示，记录、时间点与分析结果均为示例；待核查线索应结合完整课堂情境确认。</div><div class="dialog-actions"><button class="primary-button" data-action="close">知道了</button></div>`,`教学态度 / ${root.dataset.attitudeSummary?'关键指标':'基础情况'}`);
   }
   function postureDialog(i,segment,stationary=false) {
     const source=data.posture[i];
@@ -120,6 +122,7 @@ export function initAttitude({openDialog}) {
     fromRatio:ratio=>(ratio*1360-45)/1315*130,inspect:showIntensity,
     clear:()=>{root.querySelector('#body-crosshair').setAttribute('opacity','0');root.querySelector('#body-marker').setAttribute('opacity','0');}
   });
-  mountTeachingPose(root);
+  if(!['1.1','1.2'].includes(attitudeIterationVersion))mountTeachingPose(root);
   mountAttitudeIteration(root,{openDialog});
+  mountAttitudeSummary(root);
 }
