@@ -102,7 +102,7 @@ function selectSkill(name){pendingSkill=null;references=[];renderRefs();$('.sele
 panel.addEventListener('click',e=>{if(e.target.closest('[data-swap]')){shuffleRecommendations();$('.skill-grid').innerHTML=recommendations();}if(e.target.closest('[data-picker-close]')){closeSkillPicker();$('[data-home]').focus();}if(e.target.closest('[data-clear-skill]')){pendingSkill=null;$('.selected-skill')?.remove();$('textarea').value='';}});
 panel.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('.skill-picker')){e.preventDefault();closeSkillPicker();$('[data-home]').focus();}});
 mountReferences();welcome();
-document.addEventListener('agent:scale-assist',event=>{panel.hidden=false;reopen.hidden=true;$('.agent-return-scale').hidden=false;const scaleEntry=document.querySelector('#scale-v8-entry');if(scaleEntry)scaleEntry.hidden=true;document.body.classList.add('scale-v8-open','agent-open','scale-agent-coexist');renderScaleAssist(event.detail);});
+document.addEventListener('agent:scale-assist',event=>{panel.hidden=false;reopen.hidden=true;$('.agent-return-scale').hidden=false;const scaleEntry=document.querySelector('#scale-v8-entry');if(scaleEntry)scaleEntry.hidden=true;document.body.classList.add('agent-open');if(event.detail?.embedded){document.body.classList.remove('scale-v8-open','scale-agent-coexist');}else{document.body.classList.add('scale-v8-open','scale-agent-coexist');}renderScaleAssist(event.detail);});
 window.agentDesign={get references(){return references;},get payload(){return lastPayload;},get modules(){return [...modules.keys()];},ready:true};
 
 }
