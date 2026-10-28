@@ -42,21 +42,33 @@ const dimensionStyle=doc.createElement('style');dimensionStyle.textContent=`
 .refine-findings strong{display:inline-block}
 .refine-findings li button{font:inherit;color:inherit;text-align:left;padding:0;border-radius:3px;line-height:inherit}
 .refine-findings li button:hover{color:#1d70f2;text-decoration:underline;text-underline-offset:3px}
-.refine-comparison{border-top:1px solid #e5eaf1;margin-top:14px;padding-top:10px;display:grid;gap:6px;font-size:12px;line-height:20px;color:#8a94a4;text-align:left}
-.refine-comparison>span{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
-.refine-comparison b{color:#64738a;font-weight:500;font-variant-numeric:tabular-nums}
+.refine-comparison{border-top:1px solid #e5eaf1;margin-top:auto;padding-top:12px;display:grid;gap:7px;font-size:12px;line-height:20px;color:#8a94a4;text-align:left}
+.refine-comparison>span{display:flex;align-items:baseline;justify-content:space-between;gap:6px;white-space:nowrap}
+.refine-comparison b{color:#64738a;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
 .refine-comparison em{font-style:normal;font-size:11px;color:#4d9f82}.refine-comparison em.below{color:#c89156}
 .refine-average-note{font-size:11px;font-weight:400;color:#98a2b0;margin-left:auto}
 #merged-overview #dimensions .dimension-card p{display:none}
-#merged-overview #dimensions .dimension-card{padding:18px 16px;min-height:0}
-#merged-overview #dimensions .dimension-score{margin:12px 0 0}
-#merged-overview #dimensions .dimension-score small{font-size:13px;font-weight:400;color:#929eaf;margin-left:5px;letter-spacing:0}
+#merged-overview #dimensions{gap:12px}
+#merged-overview #dimensions .dimension-card{display:flex;flex-direction:column;align-items:center;padding:18px 12px;min-width:0;min-height:250px}
+#merged-overview #dimensions .dimension-card h3{margin-bottom:8px}
+#merged-overview #dimensions .dimension-card .tag{flex:none}
+#merged-overview #dimensions .dimension-score{display:inline-flex;align-items:baseline;justify-content:center;white-space:nowrap;margin:18px 0 20px;font-size:clamp(30px,2.4vw,36px);line-height:1.1;letter-spacing:-.8px}
+#merged-overview #dimensions .dimension-score small{flex:none;font-size:12px;font-weight:400;color:#929eaf;margin-left:5px;letter-spacing:0}
 #merged-overview #dimensions .card-arrow{display:none!important}
 #merged-overview #dimensions .dimension-card::after{display:none!important}
 #recording-smart-guide>.refine-summary{grid-template-columns:1fr!important}
 #recording-smart-guide .refine-score{display:grid;grid-template-columns:1fr auto;align-items:center}
 #recording-smart-guide .refine-number{grid-column:2;grid-row:1 / 3;margin:0}
 #recording-smart-guide .refine-score button{justify-self:start}
+@media(max-width:1100px){
+ #merged-overview #dimensions{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #merged-overview #dimensions .dimension-card{min-height:230px}
+}
+@media(max-width:700px){
+ #merged-overview #dimensions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #merged-overview #dimensions .dimension-card{min-height:220px}
+ #merged-overview #dimensions .dimension-card:last-child{grid-column:1/-1}
+}
 `;doc.head.append(dimensionStyle);
 merged.querySelectorAll('#dimensions .tag.orange').forEach(tag=>tag.textContent='待提升');
 const averages=[[89.5,88.6],[91.2,90.4],[85.6,84.8],[90.3,89.7],[89.8,88.9]];
