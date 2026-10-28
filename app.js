@@ -14,7 +14,7 @@ import {mountOverviewIteration} from './overview-iteration.js?v=20260912-sync2';
 import {mountAgentIteration} from './agent-iteration.js?v=20261022-floating-panels';
 import {mountReportVersionConfig} from './report-version-config.js';
 import {mountScaleEvaluationV8} from './scale-evaluation-v8.js?v=20261028-floating-panels';
-import {mountOverviewRecordingMerge} from './overview-recording-merge.js?v=20261028-1';
+import {mountOverviewRecordingMerge} from './overview-recording-merge.js?v=20261028-2';
 
 const dimensions = [
   {name:'教学态度',score:attitudeData.score,weight:25,description:'教学投入较高，考勤与课堂行为线索待核查。',insight:attitudeData.summary,metrics:attitudeData.sections.map(s=>[s.name,s.observation,s.status])},

@@ -30,7 +30,7 @@ export function mountOverviewRecordingMerge(){
   supervisionEntry.type='button';
   supervisionEntry.id='supervision-reopen';
   supervisionEntry.className='supervision-reopen';
-  supervisionEntry.innerHTML='<span class="supervision-reopen-icon">▤</span><span>督导评价<small>量表 · 导读 · 转写 · PPT</small></span>';
+  supervisionEntry.innerHTML='<span class="supervision-reopen-icon">▤</span><span>督导评价</span>';
   document.body.append(supervisionEntry);
   const openSupervision=()=>{
     const evaluationTab=sidebar.querySelector('[data-rec-tab="evaluation"]');
@@ -83,4 +83,5 @@ export function mountOverviewRecordingMerge(){
     closeSupervision();
   },true);
   mountOverviewRefinement();
+  openSupervision();
 }
