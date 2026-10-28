@@ -14,7 +14,7 @@ body.overview-recording-merge>.recording-sidebar[hidden]{display:none!important}
 body.overview-recording-merge>.recording-sidebar .recording-collapse img{transition:transform .15s ease}
 body.overview-recording-merge.supervision-open>.recording-sidebar .recording-collapse img{transform:scaleX(-1)}
 body.overview-recording-merge #recording .recording-player:not(:fullscreen){min-height:0}
-body.overview-recording-merge #merged-overview{padding:20px 24px 32px}
+body.overview-recording-merge #merged-overview{padding:32px 24px 32px}
 body.overview-recording-merge #merged-overview>.hero{display:grid;grid-template-columns:minmax(0,1.72fr) minmax(320px,1fr);gap:24px;align-items:stretch}
 body.overview-recording-merge #merged-overview .radar-card{margin-top:0;min-height:0}
 body.overview-recording-merge #merged-overview .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
