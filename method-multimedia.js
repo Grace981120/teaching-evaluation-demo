@@ -1,5 +1,5 @@
 import {teachingMultimediaVersion} from './method-multimedia-version.js';
-import {mountMultimedia181} from './method-multimedia-v181.js';
+import {mountMultimedia181} from './method-multimedia-v181.js?v=20261028-wrap1';
 const help=t=>`<button class="mm-help" aria-label="${t}" title="${t}">?</button>`;
 const labels=['视频','PPT','其他'],colors=['#1D70F2','#00CC7E','#E545D2'];
 const content=[['图文结合',9],['包含图表',4],['纯文字',5]],readability=[['文字密集',3],['字号偏小',2],['对比不足',1]];

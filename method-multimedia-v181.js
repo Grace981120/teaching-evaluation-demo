@@ -7,7 +7,7 @@ export function mountMultimedia181(root){
   const section=document.getElementById(id);
   if(section)section.hidden=true;
  }
- const sheet=document.createElement('link');sheet.rel='stylesheet';sheet.href=new URL('./method-multimedia-v181.css',import.meta.url);document.head.append(sheet);
+ const sheet=document.createElement('link');sheet.rel='stylesheet';sheet.href=new URL('./method-multimedia-v181.css?v=20261028-wrap1',import.meta.url);document.head.append(sheet);
  root.dataset.multimediaVersion='1.8.1';
  const original=root.querySelector('.mm-grid');const grid=document.createElement('div');grid.className='mm181-grid';
  grid.append(original.firstElementChild);original.hidden=true;original.after(grid);

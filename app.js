@@ -4,7 +4,7 @@ import {initLiteracy} from './literacy.js?v=20261019-jump5';
 import {effectData} from './effect-data.js';
 import {initEffect} from './effect.js?v=20261019-jump5';
 import {methodData} from './method-data.js';
-import {initMethod} from './method.js?v=20261019-jump5';
+import {initMethod} from './method.js?v=20261028-wrap1';
 import {contentData} from './content-data.js';
 import {initContent} from './content.js?v=20261019-jump5';
 import {attitudeData} from './attitude-data.js';
