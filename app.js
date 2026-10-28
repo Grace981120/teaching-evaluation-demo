@@ -13,7 +13,7 @@ import {mountOverviewOutline} from './overview-outline.js';
 import {mountOverviewIteration} from './overview-iteration.js?v=20260912-sync2';
 import {mountAgentIteration} from './agent-iteration.js?v=20261022-floating-panels';
 import {mountReportVersionConfig} from './report-version-config.js';
-import {mountScaleEvaluationV8} from './scale-evaluation-v8.js?v=20261028-floating-panels';
+import {mountScaleEvaluationV8} from './scale-evaluation-v8.js?v=20261028-ai-all1';
 import {mountOverviewRecordingMerge} from './overview-recording-merge.js?v=20261028-2';
 
 const dimensions = [
