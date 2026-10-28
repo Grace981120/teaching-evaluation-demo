@@ -11,9 +11,10 @@ import {attitudeData} from './attitude-data.js';
 import {initAttitude} from './attitude.js?v=20261019-jump4';
 import {mountOverviewOutline} from './overview-outline.js';
 import {mountOverviewIteration} from './overview-iteration.js?v=20260912-sync2';
-import {mountAgentIteration} from './agent-iteration.js?v=20261020-recording-layout-fix';
+import {mountAgentIteration} from './agent-iteration.js?v=20261022-floating-panels';
 import {mountReportVersionConfig} from './report-version-config.js';
-import {mountScaleEvaluationV8} from './scale-evaluation-v8.js?v=20261020-recording-layout-fix';
+import {mountScaleEvaluationV8} from './scale-evaluation-v8.js?v=20261028-floating-panels';
+import {mountOverviewRecordingMerge} from './overview-recording-merge.js?v=20261028-1';
 
 const dimensions = [
   {name:'教学态度',score:attitudeData.score,weight:25,description:'教学投入较高，考勤与课堂行为线索待核查。',insight:attitudeData.summary,metrics:attitudeData.sections.map(s=>[s.name,s.observation,s.status])},
@@ -182,7 +183,7 @@ function renderRoute(scroll=false) {
   const isMethod=/^#method(?:-(behavior|language|questions|board|interaction|homework|multimedia))?$/.test(location.hash);
   const isLiteracy=/^#literacy(?:-(critical|communication|collaboration|values))?$/.test(location.hash);
   const isEffect=/^#effect(?:-(participation|monitoring|state|pyramid|anomalies|actions|expressions))?$/.test(location.hash);
-  const page=location.hash==='#recording'?'recording':isAttitude?'attitude':isContent?'content':isMethod?'method':isEffect?'effect':isLiteracy?'literacy':'overview';
+  const page=location.hash==='#recording'||location.hash==='#overview'||!location.hash?'recording':isAttitude?'attitude':isContent?'content':isMethod?'method':isEffect?'effect':isLiteracy?'literacy':'recording';
   if($('#detail-dialog').open) $('#detail-dialog').close();
   ['recording','overview','attitude','content','method','literacy','effect'].forEach(id=>{$('#'+id).hidden=id!==page;});
   document.dispatchEvent(new Event('attitude:route'));
@@ -191,7 +192,7 @@ function renderRoute(scroll=false) {
     link.classList.toggle('active',active);
     if(active) link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   });
-  document.title=`${{recording:'课堂实录',overview:'报告总览',attitude:'教学态度',content:'教学内容',method:'教学方法',literacy:'教学素养',effect:'教学效果'}[page]} · 课堂评价报告`;
+  document.title=`${{recording:'报告总览',overview:'报告总览',attitude:'教学态度',content:'教学内容',method:'教学方法',literacy:'教学素养',effect:'教学效果'}[page]} · 课堂评价报告`;
   if(scroll) {
     const attitudeTarget=$('#attitude').dataset.attitudeIteration==='1.0'?({'#attitude-posture':'attitude-body','#attitude-emotion':'attitude-investment'}[location.hash]):location.hash==='#attitude-investment'?'attitude-emotion':null;
     const target=page!=='overview' && location.hash!=='#'+page?document.getElementById(attitudeTarget||location.hash.slice(1)):null;
@@ -202,4 +203,4 @@ function renderRoute(scroll=false) {
 }
 window.addEventListener('hashchange',()=>renderRoute(true));
 window.addEventListener('popstate',()=>renderRoute(true));
-renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();mountOverviewOutline({openDialog});initAttitude({openDialog});initContent({openDialog});initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});mountOverviewIteration({openDialog});mountAgentIteration();mountScaleEvaluationV8({toast});mountReportVersionConfig({dimensions:dimensions.map(d=>d.name),toast,onChange:()=>{renderDimensions();renderRadar();}});renderRoute(/^#literacy-/.test(location.hash));
+renderDimensions();renderRadar();renderEvidence();renderSuggestions();renderTracking();mountOverviewOutline({openDialog});initAttitude({openDialog});initContent({openDialog});initMethod({openDialog});initEffect({openDialog});initLiteracy({openDialog});initRecording({openDialog,toast});mountOverviewIteration({openDialog});mountAgentIteration();mountScaleEvaluationV8({toast});mountReportVersionConfig({dimensions:dimensions.map(d=>d.name),toast,onChange:()=>{renderDimensions();renderRadar();}});mountOverviewRecordingMerge();renderRoute(/^#literacy-/.test(location.hash));
