@@ -1,5 +1,5 @@
 import {overviewRecordingMergeVersion} from './overview-recording-merge-version.js';
-import {mountOverviewRefinement} from './overview-refinement.js?v=20261028-2';
+import {mountOverviewRefinement} from './overview-refinement.js?v=20261028-3';
 
 export function mountOverviewRecordingMerge(){
   if(overviewRecordingMergeVersion==='baseline') return;
